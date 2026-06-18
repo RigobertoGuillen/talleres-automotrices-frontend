@@ -1,0 +1,30 @@
+name: Deploy Frontend to Render
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'taller-frontend/**' # Solo se dispara si hay cambios en la carpeta frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd taller-frontend && npm install
+
+      - name: Build project
+        run: cd taller-frontend && npm run build
+
+      # Aquí es donde le dices a Render que despliegue
+      - name: Trigger Render Deploy
+        run: curl "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
