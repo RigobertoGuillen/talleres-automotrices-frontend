@@ -22,7 +22,8 @@ jobs:
         run: |
           rm -rf node_modules
           rm -f package-lock.json
-          npm install --no-audit --prefer-offline
+          npm install --frozen-lockfile
+          npm rebuild
 
       - name: Build project
         run: npm run build
