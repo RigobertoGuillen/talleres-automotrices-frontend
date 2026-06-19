@@ -31,7 +31,7 @@ export default function Login() {
 
       if (success) {
         // Criterio: si son correctas redirige al menú principal
-        navigate("/home");
+        navigate("/dashboard");
       } else {
         // Criterio: si son incorrectas muestra mensaje de error
         setError("Usuario o contraseña incorrecta");
