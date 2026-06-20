@@ -27,17 +27,30 @@ export default function Login() {
 
     setTimeout(() => {
       // Criterio: debe validar las credenciales (usuario y admin)
-      const success = login(username.trim(), password.trim());
+      const user = login(username.trim(), password.trim());
 
-      if (success) {
-        // Criterio: si son correctas redirige al menú principal
-        navigate("/dashboard");
+      if (user) {
+        switch (user.rol) {
+          case "admin":
+            navigate("/dashboardAdmin");
+            break;
+          case "mecanico":
+            navigate("/dashboardMecanico");
+            break;
+          case "recepcionista":
+            navigate("/dashboardRecepcionista");
+            break;
+
+          default:
+            setError("Usuario no reconocido");
+            setIsLoading(false);
+        }
       } else {
         // Criterio: si son incorrectas muestra mensaje de error
         setError("Usuario o contraseña incorrecta");
         setIsLoading(false);
       }
-    }, 800);
+    },);
   };
 
   return (
