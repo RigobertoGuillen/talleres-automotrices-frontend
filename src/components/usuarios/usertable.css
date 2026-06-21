@@ -1,0 +1,146 @@
+@import url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css");
+
+.ut-card {
+  background: var(--color-background-primary, #fff);
+  border: 0.5px solid var(--color-border-tertiary, #e2e2e2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ut-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ut-table thead tr {
+  border-bottom: 0.5px solid var(--color-border-secondary, #ccc);
+}
+
+.ut-table th {
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ut-table td {
+  padding: 10px 14px;
+  color: var(--color-text-primary, #111);
+  border-bottom: 0.5px solid var(--color-border-tertiary, #e2e2e2);
+  vertical-align: middle;
+}
+
+.ut-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ut-table tbody tr:hover td {
+  background: var(--color-background-secondary, #f5f5f5);
+}
+
+/* avatar */
+.ut-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 500;
+  margin-right: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* rol */
+.ut-rol-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-background-secondary, #f5f5f5);
+  color: var(--color-text-secondary, #888);
+  border: 0.5px solid var(--color-border-tertiary, #e2e2e2);
+  white-space: nowrap;
+}
+
+/* estado */
+.ut-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ut-pill.activo  { background: #EAF3DE; color: #3B6D11; }
+.ut-pill.inactivo { background: #F1EFE8; color: #5F5E5A; }
+
+.ut-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* acciones */
+.ut-actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 0.5px solid var(--color-border-secondary, #ccc);
+  background: transparent;
+  color: var(--color-text-secondary, #888);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.ut-btn:hover {
+  background: var(--color-background-secondary, #f5f5f5);
+  color: var(--color-text-primary, #111);
+}
+
+.ut-btn.danger:hover {
+  background: #FCEBEB;
+  color: #A32D2D;
+  border-color: #F09595;
+}
+
+.ut-btn.toggle-on:hover {
+  background: #FAEEDA;
+  color: #854F0B;
+  border-color: #FAC775;
+}
+
+.ut-btn.toggle-off:hover {
+  background: #EAF3DE;
+  color: #3B6D11;
+  border-color: #C0DD97;
+}
+
+.ut-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary, #888);
+  font-size: 13px;
+}
+
+/* También corrección en useUser.js: getUsers no getUser */
