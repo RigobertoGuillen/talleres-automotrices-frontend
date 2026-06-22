@@ -33,7 +33,7 @@ export default function Login() {
       if (response && response.token) {
         // Guardamos el token en AuthContext o localStorage
         login(response); 
-        navigate("/home");
+        navigate("/dashboardAdmin");
       } else {
         throw new Error("Credenciales inválidas");
       }

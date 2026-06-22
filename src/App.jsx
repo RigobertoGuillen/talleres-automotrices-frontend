@@ -1,21 +1,23 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/auth/Login";
-import Home from "./pages/auth/Home";
+import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
+
       <Route path="/" element={<Login />} />
 
       <Route
-        path="/home"
+        path="/dashboardAdmin"
         element={
           <ProtectedRoute>
-            <Home />
+            <DashboardAdmin />
           </ProtectedRoute>
         }
       />
+
     </Routes>
   );
 }
