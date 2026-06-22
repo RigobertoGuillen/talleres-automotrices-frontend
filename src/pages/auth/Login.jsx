@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usuarioService } from "../../services/usuarioService";
 
-// HU: Como usuario, quiero iniciar sesión con mis credenciales,
-// para acceder a funcionalidades autorizadas (también el admin debe iniciar sesión)
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -14,46 +12,51 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => { // 1. Cambiamos a async
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!username.trim() || !password.trim()) {
-      setError("Por favor completa todos los campos");
-      return;
-    }
+  if (!username.trim() || !password.trim()) {
+    setError("Por favor completa todos los campos");
+    return;
+  }
 
-    setIsLoading(true);
-    setError("");
+  setIsLoading(true);
+  setError("");
 
-    try {
-      // 2. Llamada real al servicio
-      const response = await usuarioService.login(username.trim(), password.trim());
+  try {
+    const response = await usuarioService.login(username.trim(), password.trim());
+    
+    if (response && response.token) {
+      login(response); 
       
-      // 3. Suponiendo que el servicio devuelve { success: true, token: "..." }
-      if (response && response.token) {
-        // Guardamos el token en AuthContext o localStorage
-        login(response); 
+      const rol = response.rol || response.usuario?.rol || response.user?.rol;
+
+      if (rol === "admin" || rol === "administrador") {
         navigate("/dashboardAdmin");
+      } else if (rol === "mecanico") {
+        navigate("/dashboardMecanico");
+      } else if (rol === "recepcionista") {
+        navigate("/dashboardRecepcionista");
       } else {
-        throw new Error("Credenciales inválidas");
+        setError("Rol de usuario no reconocido en el sistema");
       }
-    } catch (err) {
-      // 4. Captura de errores reales del servidor
-      setError(err.message || "Error al conectar con el servidor");
-    } finally {
-      setIsLoading(false); // Siempre quitamos el estado de carga
+    } else {
+      throw new Error("Credenciales inválidas");
     }
-  };
+  } catch (err) {
+    setError(err.message || "Error al conectar con el servidor");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="login-root">
-      {/* Fondo decorativo */}
       <div className="dots-bg" />
       <div className="orb orb--main" />
       <div className="orb orb--accent" />
 
       <div className="login-card">
-        {/* Logo / marca */}
         <div className="login-logo">
           <div className="login-logo__icon">
             <svg
@@ -77,10 +80,7 @@ export default function Login() {
         <h1 className="login-heading">Bienvenido de vuelta</h1>
         <p className="login-subheading">Ingresa tus credenciales para continuar</p>
 
-        {/* Criterio: el sistema solicita usuario y contraseña */}
         <form onSubmit={handleSubmit} noValidate>
-
-          {/* Campo usuario */}
           <div className="login-field">
             <label htmlFor="username" className="login-label">
               Usuario
@@ -114,7 +114,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Campo contraseña */}
           <div className="login-field">
             <label htmlFor="password" className="login-label">
               Contraseña
@@ -148,14 +147,12 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Recuperar contraseña */}
           <div className="login-forgot-wrap">
             <a href="#" className="login-forgot">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
 
-          {/* Criterio: si son incorrectas muestra mensaje de error */}
           {error && (
             <div className="login-error" role="alert">
               <svg
@@ -174,7 +171,6 @@ export default function Login() {
             </div>
           )}
 
-          {/* Botón enviar */}
           <button type="submit" disabled={isLoading} className="login-btn">
             {isLoading ? (
               <>
