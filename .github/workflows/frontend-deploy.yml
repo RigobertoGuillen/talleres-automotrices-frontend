@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-    # Quitamos la sección 'paths' porque ahora el repo es solo frontend
-    
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -16,14 +15,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Ensure stable npm (workaround for optional deps bug)
+        run: npm install -g npm@9
+
+      - name: Clean any existing install artifacts
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-          npm install --frozen-lockfile
-          npm rebuild
+        run: npm install
 
       - name: Build project
         run: npm run build
