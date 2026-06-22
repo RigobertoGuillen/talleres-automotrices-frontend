@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
@@ -13,7 +14,7 @@ const modules = [
   {key: "inventario", label: "Inventario"},
   {key: "facturación", label: "Facturación"},
   {key: "reportes", label: "Reportes"},
-  {key: "usuarios", label: "Gestion de Usuarios"},
+  {key: "usuarios", label: "Gestión de Usuarios"}, // Este es el que quieres que redirija
 ];
 
 //datos de ejemplo para las tarjetas de estadisticas
@@ -55,6 +56,17 @@ const welcome = {
 export default function DashboardAdmin() {
 
   const [module, setModule] = useState("dashboard");
+  const navigate = useNavigate();
+  
+  const handleModule = (moduleKey) => {
+    // Si el módulo seleccionado es "usuarios", redirige a la ruta
+    if(moduleKey === "usuarios"){
+      navigate("/usuarios/UserPage");
+      return;
+    }
+    // Para los demás módulos, solo cambia el estado
+    setModule(moduleKey);
+  }
 
   return (
 
@@ -63,9 +75,9 @@ export default function DashboardAdmin() {
       <Sidebar
         modules={modules}
         active={module}
-        onSelect={setModule}
+        onSelect={handleModule}
       />
-
+      
       <main className="dashboard-content">
 
         <Header
@@ -98,5 +110,3 @@ export default function DashboardAdmin() {
   )
 
 };
-
-
