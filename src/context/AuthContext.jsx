@@ -1,59 +1,31 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-const usuarios = [
-    {
-        username: "admin",
-        password: "admin123",
-        rol: "admin"
-    },
-    {
-        username: "Usuario1",
-        password: "user123",
-        rol: "recepcionista"
-    },
-    {
-        username: "Usuario2",
-        password: "user123",
-        rol: "mecanico"
-    }
-];
-
 export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem("usuario");
+    return stored ? JSON.parse(stored) : null;
+  });
 
-    const [user, setUser] = useState(null);
+  const login = (data) => {
+    // data = { success, message, token, usuario }
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("usuario", JSON.stringify(data.usuario));
+    setUser(data.usuario);
+  };
 
-    const login = (username, password) => {
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    setUser(null);
+  };
 
-        const usuario = usuarios.find(
-            u =>
-                u.username.toLowerCase() === username.toLowerCase() &&
-                u.password === password
-        );
-
-        if (!usuario) return false;
-
-        setUser(usuario);
-
-        return usuario;
-    };
-
-    const logout = () => {
-        setUser(null);
-    };
-
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                login,
-                logout
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);

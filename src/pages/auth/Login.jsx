@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { usuarioService } from "../../services/usuarioService";
 
 // HU: Como usuario, quiero iniciar sesión con mis credenciales,
 // para acceder a funcionalidades autorizadas (también el admin debe iniciar sesión)
@@ -13,10 +14,9 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // 1. Cambiamos a async
     e.preventDefault();
 
-    // Criterio: el sistema solicita usuario y contraseña
     if (!username.trim() || !password.trim()) {
       setError("Por favor completa todos los campos");
       return;
@@ -25,32 +25,24 @@ export default function Login() {
     setIsLoading(true);
     setError("");
 
-    setTimeout(() => {
-      // Criterio: debe validar las credenciales (usuario y admin)
-      const user = login(username.trim(), password.trim());
-
-      if (user) {
-        switch (user.rol) {
-          case "admin":
-            navigate("/dashboardAdmin");
-            break;
-          case "mecanico":
-            navigate("/dashboardMecanico");
-            break;
-          case "recepcionista":
-            navigate("/dashboardRecepcionista");
-            break;
-
-          default:
-            setError("Usuario no reconocido");
-            setIsLoading(false);
-        }
+    try {
+      // 2. Llamada real al servicio
+      const response = await usuarioService.login(username.trim(), password.trim());
+      
+      // 3. Suponiendo que el servicio devuelve { success: true, token: "..." }
+      if (response && response.token) {
+        // Guardamos el token en AuthContext o localStorage
+        login(response); 
+        navigate("/dashboardAdmin");
       } else {
-        // Criterio: si son incorrectas muestra mensaje de error
-        setError("Usuario o contraseña incorrecta");
-        setIsLoading(false);
+        throw new Error("Credenciales inválidas");
       }
-    },);
+    } catch (err) {
+      // 4. Captura de errores reales del servidor
+      setError(err.message || "Error al conectar con el servidor");
+    } finally {
+      setIsLoading(false); // Siempre quitamos el estado de carga
+    }
   };
 
   return (

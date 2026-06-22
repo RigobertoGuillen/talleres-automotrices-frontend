@@ -1,16 +1,10 @@
-
-
-
 export default function Sidebar({
   modules,
-  current,
+  active,
   onSelect
 }) {
 
-
   return (
-
-
     <aside className="sidebar">
 
       <h2 className="logo">
@@ -23,9 +17,9 @@ export default function Sidebar({
           modules.map(item => (
 
             <button
-              key={item.id}
+              key={item.key}
               className={
-                current === item.key
+                active === item.key
                   ? "menu active"
                   : "menu"
               }

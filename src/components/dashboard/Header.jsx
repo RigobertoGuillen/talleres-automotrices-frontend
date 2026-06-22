@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Header({
   title,
@@ -6,6 +7,12 @@ export default function Header({
 }) {
 
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header className="header">
@@ -31,22 +38,21 @@ export default function Header({
         boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
       }}
       className="btn"
-      onClick={() => navigate("/")}
+      onClick={handleLogout}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#c0392b"; // Rojo más oscuro
-        e.currentTarget.style.transform = "scale(1.05)"; // Efecto de crecimiento
+        e.currentTarget.style.backgroundColor = "#c0392b";
+        e.currentTarget.style.transform = "scale(1.05)";
         e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "#e74c3c"; // Rojo original
-        e.currentTarget.style.transform = "scale(1)"; // Tamaño original
+        e.currentTarget.style.backgroundColor = "#e74c3c";
+        e.currentTarget.style.transform = "scale(1)";
         e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
       }}
     >
       Cerrar Sesión
     </button>
 
-
-        </header>
-      );
-    }
+    </header>
+  );
+}
