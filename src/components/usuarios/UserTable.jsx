@@ -46,12 +46,12 @@ export default function UserTable({ users, onEdit, onDelete, onToggle }) {
                     style={{ background: av.bg, color: av.color }}
                     aria-hidden="true"
                   >
-                    {getInitials(user.name)}
+                    {getInitials(user.nombre_completo)}
                   </span>
-                  {user.name}
+                  {user.nombre_completo}
                 </td>
                 <td>
-                  <span className="ut-rol-badge">{user.rol?.nombre ?? "—"}</span>
+                  <span className="ut-rol-badge">{user.rol ?? "—"}</span>
                 </td>
                 <td>
                   <span className={`ut-pill ${user.activo ? "activo" : "inactivo"}`}>
@@ -70,7 +70,7 @@ export default function UserTable({ users, onEdit, onDelete, onToggle }) {
                     </button>
                     <button
                       className={`ut-btn ${user.activo ? "toggle-on" : "toggle-off"}`}
-                      onClick={() => onToggle(user.id)}
+                      onClick={() => onToggle(user.id, !user.activo)}
                       title={user.activo ? "Desactivar usuario" : "Activar usuario"}
                     >
                       <i

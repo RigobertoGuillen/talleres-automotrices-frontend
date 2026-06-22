@@ -34,8 +34,8 @@ export default function useUsers() {
     loadUsers();
   };
 
-  const changeStatus = async (id) => {
-    await toggleUser(id);
+  const changeStatus = async (id, activo) => {
+    await toggleUser(id, activo);
     loadUsers();
   };
 

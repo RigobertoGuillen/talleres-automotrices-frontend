@@ -9,7 +9,7 @@ const ROLES = [
 
 export default function UserForm({ onSave, initial, onCancel }) {
   const [form, setForm] = useState(
-    initial ?? { nombre: "", email: "", password: "", rolId: "" }
+    initial ?? { nombre_completo: "", nombre_usuario: "", correo: "", contrasena: "", rol_id: "" }
   );
 
   const handleChange = (e) =>
@@ -29,39 +29,52 @@ export default function UserForm({ onSave, initial, onCancel }) {
       <form onSubmit={handleSubmit} autoComplete="off">
         <div className="uf-grid">
           <div className="uf-group">
-            <label htmlFor="nombre">Nombre completo</label>
+            <label htmlFor="nombre_completo">Nombre completo</label>
             <input
-              id="nombre"
-              name="nombre"
+              id="nombre_completo"
+              name="nombre_completo"
               type="text"
               placeholder="Ej. María López"
-              value={form.nombre}
+              value={form.nombre_completo}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="uf-group">
-            <label htmlFor="email">Correo electrónico</label>
+            <label htmlFor="nombre_usuario">Usuario</label>
             <input
-              id="email"
-              name="email"
+              id="nombre_usuario"
+              name="nombre_usuario"
+              type="text"
+              placeholder="Ej. mlopez"
+              value={form.nombre_usuario}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="uf-group">
+            <label htmlFor="correo">Correo electrónico</label>
+            <input
+              id="correo"
+              name="correo"
               type="email"
               placeholder="correo@ejemplo.com"
-              value={form.email}
+              value={form.correo}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="uf-group">
-            <label htmlFor="password">Contraseña</label>
+            <label htmlFor="contrasena">Contraseña</label>
             <input
-              id="password"
-              name="password"
+              id="contrasena"
+              name="contrasena"
               type="password"
               placeholder="••••••••"
-              value={form.password}
+              value={form.contrasena}
               onChange={handleChange}
               required={!initial}
             />
@@ -74,8 +87,8 @@ export default function UserForm({ onSave, initial, onCancel }) {
                 <button
                   key={r.id}
                   type="button"
-                  className={`uf-role-card${form.rolId === r.id ? " selected" : ""}`}
-                  onClick={() => setForm({ ...form, rolId: r.id })}
+                  className={`uf-role-card${form.rol_id === r.id ? " selected" : ""}`}
+                  onClick={() => setForm({ ...form, rol_id: r.id })}
                 >
                   <i className={`ti ${r.icon} uf-role-icon`} aria-hidden="true" />
                   <span>
@@ -88,8 +101,8 @@ export default function UserForm({ onSave, initial, onCancel }) {
             {/* campo oculto para validación nativa */}
             <input
               type="text"
-              name="rolId"
-              value={form.rolId}
+              name="rol_id"
+              value={form.rol_id}
               onChange={() => {}}
               required
               style={{ opacity: 0, height: 0, position: "absolute", pointerEvents: "none" }}

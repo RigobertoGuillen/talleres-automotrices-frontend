@@ -1,10 +1,9 @@
-// src/services/userService.js
-import api from "../api/axios";
+import api from "./api";
 
 export const getUsers = async () => {
   try {
     const { data } = await api.get("/usuarios");
-    return data;
+    return data.data;
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     throw error;
@@ -54,9 +53,9 @@ export const deleteUser = async (id) => {
 
 };
 
-export const toggleUser = async (id) => {
+export const toggleUser = async (id, activo) => {
   try {
-    const { data } = await api.patch(`/usuarios/${id}/toggle`);
+    const { data } = await api.patch(`/usuarios/${id}/estado`, { activo });
     return data;
   } catch (error) {
     console.error("Error al cambiar estado del usuario:", error);
