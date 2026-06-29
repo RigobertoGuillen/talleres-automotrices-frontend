@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
+import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
 
 const modules = [
@@ -18,10 +19,10 @@ const modules = [
 ];
 
 const cards = [
-  { title: "Órdenes Pendientes", value: 12,    color: "#4CAF50" },
-  { title: "Vehículos",          value: "128",  color: "#2196F3" },
-  { title: "Diagnósticos",       value: "45",   color: "#FF9800" },
-  { title: "Clientes",           value: "200",  color: "#9C27B0" },
+  { title: "Órdenes Pendientes", value: 12,    color: "#6C63FF" },
+  { title: "Vehículos",          value: "128",  color: "#63B3ED" },
+  { title: "Diagnósticos",       value: "45",   color: "#F6AD55" },
+  { title: "Clientes",           value: "200",  color: "#68D391" },
 ];
 
 const header = {
@@ -50,11 +51,6 @@ export default function DashboardAdmin() {
     switch (module) {
       case "cliente":
         return <ClientesModule />;
-      // case "ordenes":      return <OrdenesModule />;
-      // case "vehiculos":    return <VehiculosModule />;
-      // case "inventario":   return <InventarioModule />;
-      // case "facturación":  return <FacturacionModule />;
-      // case "reportes":     return <ReportesModule />;
       default:
         return (
           <>
@@ -80,10 +76,13 @@ export default function DashboardAdmin() {
   return (
     <div className="dashboard">
       <Sidebar modules={modules} active={module} onSelect={handleModule} />
-      <main className="dashboard-content">
+      <div className="dashboard-main">
         <Header title={header.title} subtitle={header.subtitle} />
-        {renderContent()}
-      </main>
+        <main className="dashboard-content">
+          {renderContent()}
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

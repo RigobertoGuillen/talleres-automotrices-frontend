@@ -19,6 +19,29 @@ function fmtDate(iso) {
   });
 }
 
+const AVATAR_COLORS = [
+  { bg: "rgba(108,99,255,0.18)", color: "#9B8FFF" },
+  { bg: "rgba(99,179,237,0.18)", color: "#63B3ED" },
+  { bg: "rgba(72,187,120,0.18)", color: "#68D391" },
+  { bg: "rgba(246,173,85,0.18)", color: "#F6AD55" },
+];
+
+const PAGE_SIZES = [20, 10];
+
+function getPageSizes(total) {
+  if (total === 0) return [];
+  const sizes = [];
+  let remaining = total;
+  let first = true;
+  while (remaining > 0) {
+    const size = first ? PAGE_SIZES[0] : PAGE_SIZES[1];
+    sizes.push(Math.min(size, remaining));
+    remaining -= size;
+    first = false;
+  }
+  return sizes;
+}
+
 export default function ClientesModule() {
   const { user } = useAuth();
   const esAdmin = user?.rol === "admin" || user?.rol === "administrador";
@@ -46,13 +69,16 @@ export default function ClientesModule() {
   const [saving, setSaving]                 = useState(false);
   const [toast, setToast]                   = useState(null);
 
+  // Paginación
+  const [page, setPage] = useState(0);
+
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3200);
   }
 
-  function openNew()  { setEditingCliente(null); setFormOpen(true); }
-  function openEdit(c) { setEditingCliente(c);  setFormOpen(true); }
+  function openNew()   { setEditingCliente(null); setFormOpen(true); }
+  function openEdit(c) { setEditingCliente(c);    setFormOpen(true); }
 
   async function handleSave(payload) {
     setSaving(true);
@@ -89,6 +115,16 @@ export default function ClientesModule() {
       setDeleting(false);
     }
   }
+
+  // Calcular páginas
+  const pageSizes   = getPageSizes(clientes.length);
+  const totalPages  = pageSizes.length;
+  const offset      = pageSizes.slice(0, page).reduce((a, b) => a + b, 0);
+  const pageClientes = clientes.slice(offset, offset + (pageSizes[page] ?? 10));
+
+  const handlePageChange = (p) => {
+    setPage(p);
+  };
 
   return (
     <div className="cl-page">
@@ -133,106 +169,139 @@ export default function ClientesModule() {
       {/* Error */}
       {error && <div className="cl-error">⚠ {error}</div>}
 
-      {/* Tabla */}
-      <div className="cl-table-card">
-        <table className="cl-table">
-          <thead>
-            <tr>
-              <th style={{ width: "28%" }}>Cliente</th>
-              <th style={{ width: "22%" }}>Contacto</th>
-              <th style={{ width: "16%" }}>DNI</th>
-              <th style={{ width: "14%" }}>Ciudad</th>
-              <th style={{ width: "11%" }}>Alta</th>
-              <th style={{ width: "9%" }} className="right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={6}>
-                  <div className="cl-loading">Cargando clientes…</div>
-                </td>
-              </tr>
-            )}
+      {/* Loading */}
+      {loading && (
+        <div className="cl-loading">Cargando clientes…</div>
+      )}
 
-            {!loading && clientes.length === 0 && (
-              <tr>
-                <td colSpan={6}>
-                  <div className="cl-empty">
-                    <span className="cl-empty__icon">👥</span>
-                    <p className="cl-empty__title">
-                      {query || filtro ? "Sin resultados" : "Sin clientes registrados"}
-                    </p>
-                    <p className="cl-empty__desc">
-                      {query || filtro
-                        ? "Intenta con otro criterio de búsqueda."
-                        : "Comienza registrando el primer cliente."}
-                    </p>
-                    {!query && !filtro && (
+      {/* Estado vacío */}
+      {!loading && clientes.length === 0 && (
+        <div className="cl-empty">
+          <span className="cl-empty__icon">👥</span>
+          <p className="cl-empty__title">
+            {query || filtro ? "Sin resultados" : "Sin clientes registrados"}
+          </p>
+          <p className="cl-empty__desc">
+            {query || filtro
+              ? "Intenta con otro criterio de búsqueda."
+              : "Comienza registrando el primer cliente."}
+          </p>
+          {!query && !filtro && (
+            <button
+              className="cl-btn cl-btn--primary"
+              style={{ marginTop: 12 }}
+              onClick={openNew}
+            >
+              + Registrar cliente
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Grid de tarjetas */}
+      {!loading && clientes.length > 0 && (
+        <>
+          {/* Info de página */}
+          <div className="cl-page-info">
+            <span>Mostrando <strong>{pageClientes.length}</strong> de <strong>{clientes.length}</strong> clientes</span>
+            {totalPages > 1 && (
+              <span className="cl-page-badge">Página {page + 1} de {totalPages}</span>
+            )}
+          </div>
+
+          {/* Tarjetas */}
+          <div className="cl-cards-grid">
+            {pageClientes.map((c, i) => {
+              const av = AVATAR_COLORS[(offset + i) % AVATAR_COLORS.length];
+              return (
+                <div key={c.id} className="cl-client-card">
+                  <div className="cl-client-card__top">
+                    <div
+                      className="cl-avatar cl-avatar--lg"
+                      style={{ background: av.bg, color: av.color }}
+                    >
+                      {initials(c)}
+                    </div>
+                    <div className="cl-client-card__actions">
                       <button
-                        className="cl-btn cl-btn--primary"
-                        style={{ marginTop: 12 }}
-                        onClick={openNew}
-                      >
-                        + Registrar cliente
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            )}
-
-            {!loading && clientes.map((c) => (
-              <tr key={c.id}>
-                <td>
-                  <div className="cl-cell-wrap">
-                    <div className="cl-avatar">{initials(c)}</div>
-                    <div>
-                      <div className="cl-name">{fullName(c)}</div>
-                      {c.colonia && <div className="cl-sub">{c.colonia}</div>}
+                        className="cl-btn cl-btn--ghost"
+                        title="Ver historial"
+                        onClick={() => setHistorialCliente(c)}
+                      >📋</button>
+                      <button
+                        className="cl-btn cl-btn--ghost"
+                        title="Editar"
+                        onClick={() => openEdit(c)}
+                      >✏️</button>
+                      {esAdmin && (
+                        <button
+                          className="cl-btn cl-btn--ghost cl-btn--danger"
+                          title="Eliminar (solo admin)"
+                          onClick={() => setDeleteTarget(c)}
+                        >🗑</button>
+                      )}
                     </div>
                   </div>
-                </td>
-                <td>
-                  <div className="cl-name">{c.telefono}</div>
-                  <div className="cl-sub">
-                    {c.correo ?? <span className="cl-no-correo">Sin correo</span>}
-                  </div>
-                </td>
-                <td className="cl-dni">{c.dni ?? "—"}</td>
-                <td>
-                  <div className="cl-name">{c.ciudad ?? "—"}</div>
-                  <div className="cl-sub">{c.departamento ?? ""}</div>
-                </td>
-                <td className="cl-fecha">{fmtDate(c.fecha_registro)}</td>
-                <td>
-                  <div className="cl-actions">
-                    <button
-                      className="cl-btn cl-btn--ghost"
-                      title="Ver historial"
-                      onClick={() => setHistorialCliente(c)}
-                    >📋</button>
-                    <button
-                      className="cl-btn cl-btn--ghost"
-                      title="Editar"
-                      onClick={() => openEdit(c)}
-                    >✏️</button>
 
-                    {/* Solo visible para administrador */}
-                    {esAdmin && (
-                      <button
-                        className="cl-btn cl-btn--ghost cl-btn--danger"
-                        title="Eliminar (solo admin)"
-                        onClick={() => setDeleteTarget(c)}
-                      >🗑</button>
-                    )}
+                  <div className="cl-client-card__body">
+                    <p className="cl-client-card__name">{fullName(c)}</p>
+                    {c.colonia && <p className="cl-sub">{c.colonia}</p>}
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+                  <div className="cl-client-card__info">
+                    {c.telefono && (
+                      <span className="cl-chip">📞 {c.telefono}</span>
+                    )}
+                    {c.ciudad && (
+                      <span className="cl-chip">📍 {c.ciudad}{c.departamento ? `, ${c.departamento}` : ""}</span>
+                    )}
+                    {c.dni && (
+                      <span className="cl-chip">🪪 {c.dni}</span>
+                    )}
+                    {c.correo ? (
+                      <span className="cl-chip">✉ {c.correo}</span>
+                    ) : (
+                      <span className="cl-chip cl-chip--muted">Sin correo</span>
+                    )}
+                    <span className="cl-chip">📅 {fmtDate(c.fecha_registro)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="cl-pagination">
+              <button
+                className="cl-page-btn"
+                disabled={page === 0}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                ← Anterior
+              </button>
+              <div className="cl-page-numbers">
+                {Array.from({ length: totalPages }, (_, idx) => (
+                  <button
+                    key={idx}
+                    className={`cl-page-num ${idx === page ? "cl-page-num--active" : ""}`}
+                    onClick={() => handlePageChange(idx)}
+                  >
+                    {idx + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="cl-page-btn"
+                disabled={page === totalPages - 1}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Modales */}
       <ClienteForm
@@ -250,7 +319,6 @@ export default function ClientesModule() {
         fetchHistorial={fetchHistorial}
       />
 
-      {/* Confirm solo se monta si esAdmin, doble seguro */}
       {esAdmin && (
         <ConfirmDialog
           open={!!deleteTarget}

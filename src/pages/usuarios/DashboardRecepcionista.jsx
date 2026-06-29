@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
+import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
 
 const modules = [
@@ -15,10 +16,10 @@ const modules = [
 ];
 
 const cards = [
-  { title: "Órdenes activas",   value: 12,         color: "#4CAF50" },
-  { title: "Clientes",          value: "128",       color: "#2196F3" },
-  { title: "Ingresos cobrados", value: "$2,000.00", color: "#FF9800" },
-  { title: "Stock bajo",        value: "2",         color: "#9C27B0" },
+  { title: "Órdenes activas",   value: 12,         color: "#6C63FF" },
+  { title: "Clientes",          value: "128",       color: "#63B3ED" },
+  { title: "Ingresos cobrados", value: "$2,000.00", color: "#F6AD55" },
+  { title: "Stock bajo",        value: "2",         color: "#FC8181" },
 ];
 
 const header = {
@@ -38,8 +39,6 @@ export default function DashboardRecepcionista() {
     switch (module) {
       case "cliente":
         return <ClientesModule />;
-      // case "ordenes":   return <OrdenesModule />;
-      // case "vehiculos": return <VehiculosModule />;
       default:
         return (
           <>
@@ -65,10 +64,13 @@ export default function DashboardRecepcionista() {
   return (
     <div className="dashboard">
       <Sidebar modules={modules} active={module} onSelect={setModule} />
-      <main className="dashboard-content">
+      <div className="dashboard-main">
         <Header title={header.title} subtitle={header.subtitle} />
-        {renderContent()}
-      </main>
+        <main className="dashboard-content">
+          {renderContent()}
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }
