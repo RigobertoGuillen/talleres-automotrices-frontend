@@ -16,7 +16,7 @@ const modules = [
 
 const cards = [
   { title: "Órdenes activas",   value: 12,         color: "#4CAF50" },
-  { title: "clientes",          value: "128",       color: "#2196F3" },
+  { title: "Clientes",          value: "128",       color: "#2196F3" },
   { title: "Ingresos cobrados", value: "$2,000.00", color: "#FF9800" },
   { title: "Stock bajo",        value: "2",         color: "#9C27B0" },
 ];
@@ -38,6 +38,8 @@ export default function DashboardRecepcionista() {
     switch (module) {
       case "cliente":
         return <ClientesModule />;
+      // case "ordenes":   return <OrdenesModule />;
+      // case "vehiculos": return <VehiculosModule />;
       default:
         return (
           <>

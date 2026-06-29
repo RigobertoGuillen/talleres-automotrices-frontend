@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useClientes } from "../../hooks/useClientes";
 import ClienteForm from "../../components/clientes/ClienteForm";
 import HistorialModal from "../../components/clientes/HistorialModal";
@@ -19,6 +20,9 @@ function fmtDate(iso) {
 }
 
 export default function ClientesModule() {
+  const { user } = useAuth();
+  const esAdmin = user?.rol === "admin" || user?.rol === "administrador";
+
   const { clientes, loading, error, load, add, edit, remove, fetchHistorial } =
     useClientes();
 
@@ -37,18 +41,18 @@ export default function ClientesModule() {
     load(query, val);
   }
 
-  const [formOpen, setFormOpen]           = useState(false);
+  const [formOpen, setFormOpen]             = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
-  const [saving, setSaving]               = useState(false);
-  const [toast, setToast]                 = useState(null);
+  const [saving, setSaving]                 = useState(false);
+  const [toast, setToast]                   = useState(null);
 
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3200);
   }
 
-  function openNew() { setEditingCliente(null); setFormOpen(true); }
-  function openEdit(c) { setEditingCliente(c); setFormOpen(true); }
+  function openNew()  { setEditingCliente(null); setFormOpen(true); }
+  function openEdit(c) { setEditingCliente(c);  setFormOpen(true); }
 
   async function handleSave(payload) {
     setSaving(true);
@@ -213,11 +217,15 @@ export default function ClientesModule() {
                       title="Editar"
                       onClick={() => openEdit(c)}
                     >✏️</button>
-                    <button
-                      className="cl-btn cl-btn--ghost cl-btn--danger"
-                      title="Eliminar"
-                      onClick={() => setDeleteTarget(c)}
-                    >🗑</button>
+
+                    {/* Solo visible para administrador */}
+                    {esAdmin && (
+                      <button
+                        className="cl-btn cl-btn--ghost cl-btn--danger"
+                        title="Eliminar (solo admin)"
+                        onClick={() => setDeleteTarget(c)}
+                      >🗑</button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -242,25 +250,25 @@ export default function ClientesModule() {
         fetchHistorial={fetchHistorial}
       />
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        loading={deleting}
-        title="Eliminar cliente"
-        description={
-          deleteTarget
-            ? `¿Eliminar a ${fullName(deleteTarget)}? Esta acción no se puede deshacer.`
-            : ""
-        }
-        confirmLabel="Eliminar"
-      />
+      {/* Confirm solo se monta si esAdmin, doble seguro */}
+      {esAdmin && (
+        <ConfirmDialog
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDelete}
+          loading={deleting}
+          title="Eliminar cliente"
+          description={
+            deleteTarget
+              ? `¿Eliminar a ${fullName(deleteTarget)}? Esta acción no se puede deshacer.`
+              : ""
+          }
+          confirmLabel="Eliminar"
+        />
+      )}
 
-      {/* Toast */}
       {toast && (
-        <div className={`cl-toast cl-toast--${toast.type}`}>
-          {toast.msg}
-        </div>
+        <div className={`cl-toast cl-toast--${toast.type}`}>{toast.msg}</div>
       )}
     </div>
   );
