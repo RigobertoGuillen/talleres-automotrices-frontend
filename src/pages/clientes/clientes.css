@@ -1,0 +1,676 @@
+/* ================================================
+   MÓDULO CLIENTES — clientes.css
+   Paleta: oscura #0D0F1A + acento #6C63FF
+   Importar en ClientesModule.jsx:
+   import "../../clientes/styles/clientes.css";
+   ================================================ */
+
+/* ── Página principal ──────────────────────────── */
+.cl-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Header ────────────────────────────────────── */
+.cl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cl-header__left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #E8E6FF;
+  letter-spacing: -0.4px;
+  margin: 0 0 4px;
+}
+
+.cl-header__left p {
+  font-size: 13px;
+  color: #7B7A9E;
+  margin: 0;
+}
+
+/* ── Botones ───────────────────────────────────── */
+.cl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  border: none;
+}
+
+.cl-btn--primary {
+  background: linear-gradient(135deg, #6C63FF, #9B8FFF);
+  color: #fff;
+}
+
+.cl-btn--primary:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.cl-btn--secondary {
+  background: #1C1E2E;
+  color: #C8C6E8;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.cl-btn--secondary:hover {
+  background: #22253A;
+}
+
+.cl-btn--ghost {
+  background: transparent;
+  color: #7B7A9E;
+  border: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.cl-btn--ghost:hover {
+  background: #1C1E2E;
+  color: #E8E6FF;
+}
+
+.cl-btn--danger:hover {
+  background: rgba(226, 75, 74, 0.12);
+  color: #F09595;
+}
+
+.cl-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Filtros ───────────────────────────────────── */
+.cl-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.cl-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.cl-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+  color: #5A5880;
+}
+
+.cl-search-input {
+  width: 100%;
+  height: 38px;
+  padding-left: 36px;
+  padding-right: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  background: #141626;
+  color: #E8E6FF;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.cl-search-input::placeholder {
+  color: #3E3C5E;
+}
+
+.cl-search-input:focus {
+  border-color: #6C63FF;
+}
+
+.cl-filter-select {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  background: #141626;
+  color: #C8C6E8;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cl-filter-select:focus {
+  border-color: #6C63FF;
+}
+
+.cl-count {
+  font-size: 12px;
+  color: #5A5880;
+  margin-left: auto;
+}
+
+/* ── Error banner ──────────────────────────────── */
+.cl-error {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(226, 75, 74, 0.08);
+  border: 1px solid rgba(226, 75, 74, 0.22);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #F09595;
+  margin-bottom: 1rem;
+}
+
+/* ── Tabla ─────────────────────────────────────── */
+.cl-table-card {
+  border: 1px solid rgba(108, 99, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #141626;
+}
+
+.cl-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.cl-table thead {
+  background: #0D0F1A;
+}
+
+.cl-table th {
+  padding: 11px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5A5880;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(108, 99, 255, 0.1);
+}
+
+.cl-table th.right {
+  text-align: right;
+}
+
+.cl-table td {
+  padding: 13px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(108, 99, 255, 0.07);
+  vertical-align: middle;
+}
+
+.cl-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cl-table tbody tr {
+  transition: background 0.12s;
+}
+
+.cl-table tbody tr:hover {
+  background: rgba(108, 99, 255, 0.04);
+}
+
+/* ── Celda cliente ─────────────────────────────── */
+.cl-cell-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cl-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(108,99,255,0.25), rgba(155,143,255,0.15));
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9B8FFF;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.cl-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #E8E6FF;
+}
+
+.cl-sub {
+  font-size: 12px;
+  color: #5A5880;
+  margin-top: 2px;
+}
+
+.cl-dni {
+  font-size: 12px;
+  color: #7B7A9E;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+.cl-no-correo {
+  font-style: italic;
+  color: #3E3C5E;
+  font-size: 12px;
+}
+
+.cl-fecha {
+  font-size: 12px;
+  color: #5A5880;
+}
+
+.cl-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+/* ── Estado vacío / cargando ───────────────────── */
+.cl-empty {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #5A5880;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cl-empty__icon {
+  font-size: 32px;
+}
+
+.cl-empty__title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #7B7A9E;
+  margin: 0;
+}
+
+.cl-empty__desc {
+  font-size: 13px;
+  color: #5A5880;
+  margin: 0;
+}
+
+.cl-loading {
+  text-align: center;
+  padding: 2.5rem;
+  font-size: 13px;
+  color: #5A5880;
+}
+
+/* ── Overlay / Modal base ──────────────────────── */
+.cl-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.cl-modal {
+  background: #141626;
+  border-radius: 16px;
+  border: 1px solid rgba(108, 99, 255, 0.18);
+  width: min(540px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.cl-modal--sm {
+  width: min(360px, 96vw);
+}
+
+/* ── Modal header ──────────────────────────────── */
+.cl-modal__header {
+  padding: 1.4rem 1.4rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cl-modal__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #E8E6FF;
+  margin: 0 0 4px;
+  letter-spacing: -0.3px;
+}
+
+.cl-modal__desc {
+  font-size: 13px;
+  color: #7B7A9E;
+  margin: 0;
+}
+
+.cl-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5A5880;
+  font-size: 18px;
+  padding: 2px 6px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.cl-modal__close:hover {
+  color: #E8E6FF;
+  background: rgba(108, 99, 255, 0.1);
+}
+
+/* ── Modal body ────────────────────────────────── */
+.cl-modal__body {
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cl-modal__footer {
+  padding: 0 1.4rem 1.4rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── Sección label dentro del form ────────────── */
+.cl-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #5A5880;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.cl-divider {
+  border: none;
+  border-top: 1px solid rgba(108, 99, 255, 0.1);
+  margin: 2px 0;
+}
+
+/* ── Grid de campos ────────────────────────────── */
+.cl-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cl-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Campo individual ──────────────────────────── */
+.cl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cl-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9896B8;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.cl-input {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(108, 99, 255, 0.18);
+  background: #0D0F1A;
+  color: #E8E6FF;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.cl-input::placeholder {
+  color: #3E3C5E;
+}
+
+.cl-input:focus {
+  border-color: #6C63FF;
+}
+
+.cl-input--error {
+  border-color: rgba(226, 75, 74, 0.5);
+}
+
+.cl-input--error:focus {
+  border-color: #E24B4A;
+}
+
+.cl-field__error {
+  font-size: 11px;
+  color: #F09595;
+}
+
+/* ── Confirm dialog ────────────────────────────── */
+.cl-confirm__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #E8E6FF;
+  margin: 0 0 8px;
+}
+
+.cl-confirm__desc {
+  font-size: 13px;
+  color: #9896B8;
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.cl-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cl-btn--delete {
+  background: linear-gradient(135deg, #E24B4A, #c0392b);
+  color: #fff;
+}
+
+.cl-btn--delete:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+/* ── Historial ─────────────────────────────────── */
+.cl-hist-inforow {
+  padding: 0 1.4rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #9896B8;
+  background: #0D0F1A;
+  border: 1px solid rgba(108, 99, 255, 0.15);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.cl-hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cl-hist-card {
+  border: 1px solid rgba(108, 99, 255, 0.12);
+  border-radius: 10px;
+  background: #0D0F1A;
+  overflow: hidden;
+}
+
+.cl-hist-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(108, 99, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cl-hist-card__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cl-orden-num {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E8E6FF;
+}
+
+.cl-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+
+.cl-badge--pendiente   { background: rgba(251,191,36,0.12);  color: #FBD000; }
+.cl-badge--en_proceso  { background: rgba(99,179,237,0.12);  color: #63B3ED; }
+.cl-badge--completado  { background: rgba(72,187,120,0.12);  color: #68D391; }
+.cl-badge--cancelado   { background: rgba(226,75,74,0.12);   color: #F09595; }
+.cl-badge--default     { background: rgba(108,99,255,0.12);  color: #9B8FFF; }
+
+.cl-hist-fecha {
+  font-size: 12px;
+  color: #5A5880;
+}
+
+.cl-hist-card__body {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cl-info-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.cl-info-row__label {
+  color: #5A5880;
+  min-width: 76px;
+  flex-shrink: 0;
+}
+
+.cl-info-row__value {
+  color: #C8C6E8;
+}
+
+/* ── Toast ─────────────────────────────────────── */
+.cl-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  z-index: 200;
+  max-width: 300px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: cl-toast-in 0.2s ease;
+}
+
+@keyframes cl-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cl-toast--success {
+  background: #0D1F18;
+  border: 1px solid rgba(72, 187, 120, 0.3);
+  color: #68D391;
+}
+
+.cl-toast--error {
+  background: #1F0D0D;
+  border: 1px solid rgba(226, 75, 74, 0.3);
+  color: #F09595;
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 640px) {
+  .cl-row-2,
+  .cl-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .cl-table th:nth-child(3),
+  .cl-table td:nth-child(3),
+  .cl-table th:nth-child(4),
+  .cl-table td:nth-child(4) {
+    display: none;
+  }
+
+  .cl-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
