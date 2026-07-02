@@ -14,8 +14,8 @@ export default function Home() {
     <div>
       <h1>Menú Principal</h1>
 
-      <p>Bienvenido {user.username}</p>
-      <p>Rol: {user.role}</p>
+      <p>Bienvenido {user.nombre_completo}</p>
+      <p>Rol: {user.rol}</p>
 
       <button onClick={handleLogout}>
         Cerrar Sesión
