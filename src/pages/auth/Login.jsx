@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usuarioService } from "../../services/usuarioService";
 
@@ -148,9 +148,9 @@ export default function Login() {
           </div>
 
           <div className="login-forgot-wrap">
-            <a href="#" className="login-forgot">
+            <Link to="/recuperar-password" className="login-forgot">
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
 
           {error && (

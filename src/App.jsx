@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/auth/Login";
+import RecuperarPassword from "./pages/auth/RecuperarPassword";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import DashboardMecanico from "./pages/usuarios/DashboardMecanico"; 
 import DashboardRecepcionista from "./pages/usuarios/DashboardRecepcionista"; 
@@ -11,6 +12,9 @@ function App() {
     <Routes>
       {/* Ruta Pública */}
       <Route path="/" element={<Login />} />
+
+      {/* Recuperar contraseña (pública) */}
+      <Route path="/recuperar-password" element={<RecuperarPassword />} />
 
       {/* Ruta solo para Administradores */}
       <Route

@@ -1,0 +1,67 @@
+/* ================================================
+   EXTRAS — Recuperar contraseña
+   Agregar al final de index.css (misma paleta del login)
+   ================================================ */
+
+/* Wrapper de página con header + card + footer */
+.login-page-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Header de la página de recuperación */
+.login-page-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.login-page-header .login-logo {
+  margin-bottom: 0;
+}
+
+/* Footer de la página */
+.login-page-footer {
+  width: 100%;
+  text-align: center;
+}
+
+.login-page-footer p {
+  font-size: 11px;
+  color: #3E3C5E;
+  letter-spacing: 0.2px;
+}
+
+/* Estado de éxito tras enviar el correo */
+.login-success {
+  text-align: center;
+  padding: 6px 0 4px;
+}
+
+.login-success__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(72, 187, 120, 0.12);
+  border: 1px solid rgba(72, 187, 120, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: #68D391;
+}
+
+.login-success__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.login-success strong {
+  color: #C8C6E8;
+}
