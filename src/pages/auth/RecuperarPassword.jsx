@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../../api/axios";
+import api from "../../services/api";
 
 export default function RecuperarPassword() {
   const [correo, setCorreo] = useState("");
@@ -29,7 +29,7 @@ export default function RecuperarPassword() {
 
     try {
       // Ajusta esta ruta cuando el backend esté listo
-      await api.post("/auth/recuperar-password", { correo: correo.trim() });
+      await api.post("/auth/recuperar", { email: correo.trim() });
       setEnviado(true);
     } catch (err) {
       const msg = err.response?.data?.message ?? "Error al conectar con el servidor";

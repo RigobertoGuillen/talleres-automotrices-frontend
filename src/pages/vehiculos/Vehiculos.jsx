@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import vehiculoService from '../../services/vehiculoService';
+import { searchClientes } from '../../services/clientesService';
 
 const TIPOS = ['Pickup', 'turismo', 'camioneta'];
-const FORM_VACIO = { placa: '', marca_id: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
-
-// ── Estilos compartidos ────────────────────────────────────────────────────────
+const FORM_VACIO = { placa: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
 
 const s = {
   btnPrimario: {
@@ -78,8 +77,6 @@ const btnAccion = (color) => ({
   cursor: 'pointer', marginRight: 6, fontWeight: 500,
 });
 
-// ── Componente principal ───────────────────────────────────────────────────────
-
 export default function Vehiculos() {
   const [vehiculos, setVehiculos] = useState([]);
   const [marcas, setMarcas] = useState([]);
@@ -96,6 +93,10 @@ export default function Vehiculos() {
   const [historialVehiculo, setHistorialVehiculo] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
+
+  const [clienteQuery, setClienteQuery] = useState('');
+  const [clientesSugeridos, setClientesSugeridos] = useState([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
 
   const cargarVehiculos = useCallback(async () => {
     setCargando(true);
@@ -117,7 +118,6 @@ export default function Vehiculos() {
       .catch(() => setMarcas([]));
   }, [cargarVehiculos]);
 
-  // HU-13: filtrado instantáneo por placa, marca o modelo
   const vehiculosFiltrados = vehiculos.filter(v => {
     if (!busqueda.trim()) return true;
     const q = busqueda.toLowerCase();
@@ -133,24 +133,38 @@ export default function Vehiculos() {
     setForm(FORM_VACIO);
     setErrorModal('');
     setModalAbierto(true);
+    setClienteQuery('');
+    setClienteSeleccionado(null);
+    setClientesSugeridos([]);
   };
 
   const abrirEditar = (v) => {
     setVehiculoEditar(v);
-    setForm({ placa: v.placa, marca_id: v.marca_id, modelo: v.modelo, anio: v.anio, color: v.color || '', tipo: v.tipo, cliente_id: v.cliente_id || '' });
+    setForm({ placa: v.placa, marca: v.marca, modelo: v.modelo, anio: v.anio, color: v.color || '', tipo: v.tipo, cliente_id: v.cliente_id || '' });
     setErrorModal('');
     setModalAbierto(true);
+    setClienteQuery('');
+    setClienteSeleccionado(null);
+    setClientesSugeridos([]);
   };
 
   const cerrarModal = () => { setModalAbierto(false); setVehiculoEditar(null); };
 
-  // HU-10 / HU-11
   const handleSubmit = async (e) => {
     e.preventDefault();
     setGuardando(true);
     setErrorModal('');
     try {
-      const payload = { ...form, marca_id: Number(form.marca_id), anio: Number(form.anio), cliente_id: Number(form.cliente_id) };
+      const marcaSeleccionada = marcas.find(m => m.id === Number(form.marca_id));
+      const payload = {
+        placa: form.placa,
+        marca: marcaSeleccionada ? marcaSeleccionada.nombre : form.marca,
+        modelo: form.modelo,
+        anio: Number(form.anio),
+        color: form.color,
+        tipo: form.tipo,
+        cliente_id: Number(form.cliente_id)
+      };
       if (vehiculoEditar) {
         await vehiculoService.actualizar(vehiculoEditar.id, payload);
       } else {
@@ -165,7 +179,6 @@ export default function Vehiculos() {
     }
   };
 
-  // HU-12: ver historial de un vehículo
   const verHistorial = async (v) => {
     setHistorialVehiculo(v);
     setCargandoHistorial(true);
@@ -181,7 +194,6 @@ export default function Vehiculos() {
 
   const cerrarHistorial = () => { setHistorialVehiculo(null); setHistorial([]); };
 
-  // Vista historial
   if (historialVehiculo) {
     return (
       <div>
@@ -231,10 +243,8 @@ export default function Vehiculos() {
     );
   }
 
-  // Vista lista
   return (
     <div>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h2 style={{ margin: 0, color: '#ffffff', fontSize: 22, fontWeight: 700 }}>Vehículos</h2>
@@ -243,7 +253,6 @@ export default function Vehiculos() {
         <button onClick={abrirCrear} style={s.btnPrimario}>+ Registrar Vehículo</button>
       </div>
 
-      {/* HU-13: Barra de búsqueda */}
       <div className="module" style={{ padding: '14px 20px', marginBottom: 16, marginTop: 0 }}>
         <input
           type="text"
@@ -254,7 +263,6 @@ export default function Vehiculos() {
         />
       </div>
 
-      {/* Tabla */}
       <div className="module" style={{ marginTop: 0, padding: 0, overflow: 'hidden' }}>
         {cargando ? (
           <p style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Cargando vehículos...</p>
@@ -293,7 +301,6 @@ export default function Vehiculos() {
         )}
       </div>
 
-      {/* Modal HU-10 / HU-11 */}
       {modalAbierto && (
         <div style={s.overlay}>
           <div style={s.modal}>
@@ -369,14 +376,57 @@ export default function Vehiculos() {
                   </select>
                 </div>
 
-                <div style={{ marginBottom: 14, gridColumn: '1 / -1' }}>
-                  <label style={s.label}>ID Cliente *</label>
+                <div style={{ marginBottom: 14, gridColumn: '1 / -1', position: 'relative' }}>
+                  <label style={s.label}>Cliente *</label>
                   <input
-                    style={s.input} type="number" required min={1}
-                    placeholder="ID numérico del cliente"
-                    value={form.cliente_id}
-                    onChange={e => setForm(f => ({ ...f, cliente_id: e.target.value }))}
+                    style={s.input}
+                    placeholder="Buscar cliente por nombre..."
+                    value={clienteQuery}
+                    onChange={async (e) => {
+                      setClienteQuery(e.target.value);
+                      setClienteSeleccionado(null);
+                      if (e.target.value.trim().length > 1) {
+                        const resultados = await searchClientes(e.target.value);
+                        setClientesSugeridos(resultados || []);
+                      } else {
+                        setClientesSugeridos([]);
+                      }
+                    }}
                   />
+                  {clientesSugeridos.length > 0 && !clienteSeleccionado && (
+                    <div style={{
+                      position: 'absolute', top: '100%', left: 0, right: 0,
+                      background: '#fff', border: '1px solid #e5e7eb',
+                      borderRadius: 8, zIndex: 10, maxHeight: 200, overflowY: 'auto',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}>
+                      {clientesSugeridos.map(c => (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setClienteSeleccionado(c);
+                            setClienteQuery(c.nombre);
+                            setClientesSugeridos([]);
+                            setForm(f => ({ ...f, cliente_id: c.id }));
+                          }}
+                          style={{
+                            padding: '10px 14px', cursor: 'pointer', fontSize: 13,
+                            borderBottom: '1px solid #f3f4f6'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                        >
+                          <strong>{c.nombre}</strong>
+                          {c.telefono && <span style={{ color: '#6b7280', marginLeft: 8 }}>{c.telefono}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {clienteSeleccionado && (
+                    <p style={{ margin: '4px 0 0', fontSize: 12, color: '#16a34a' }}>
+                      ✓ Cliente seleccionado: {clienteSeleccionado.nombre} (ID: {clienteSeleccionado.id})
+                    </p>
+                  )}
                 </div>
 
               </div>

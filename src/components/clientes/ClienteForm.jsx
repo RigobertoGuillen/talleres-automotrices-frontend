@@ -51,27 +51,29 @@ export default function ClienteForm({ open, onClose, onSave, cliente, saving }) 
     return e;
   }
 
-  function handleSubmit() {
-    const e = validate();
-    if (Object.keys(e).length > 0) { setErrors(e); return; }
-    onSave({
-      dni: form.dni || null,
-      primer_nombre: form.primer_nombre.trim(),
-      segundo_nombre: form.segundo_nombre.trim() || null,
-      primer_apellido: form.primer_apellido.trim(),
-      segundo_apellido: form.segundo_apellido.trim(),
-      telefono: form.telefono.trim(),
-      correo: form.correo.trim() || null,
-      direccion: {
-        id: cliente?.direccion_id,
-        calle: form.calle.trim(),
-        colonia: form.colonia.trim() || "",
-        ciudad: form.ciudad.trim(),
-        departamento: form.departamento.trim() || "",
-        referencia: form.referencia.trim() || null,
-      },
-    });
-  }
+function handleSubmit() {
+  const e = validate();
+  if (Object.keys(e).length > 0) { setErrors(e); return; }
+
+  const nombre = [
+    form.primer_nombre.trim(),
+    form.segundo_nombre.trim(),
+    form.primer_apellido.trim(),
+    form.segundo_apellido.trim(),
+  ].filter(Boolean).join(" ");
+
+  onSave({
+    nombre,
+    telefono: form.telefono.trim(),
+    correo: form.correo.trim() || null,
+    direccion: [
+      form.calle.trim(),
+      form.colonia.trim(),
+      form.ciudad.trim(),
+      form.departamento.trim(),
+    ].filter(Boolean).join(", "),
+  });
+}
 
   const isEditing = !!cliente;
 
