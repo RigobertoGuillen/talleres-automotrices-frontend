@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://taller-backend-bvai.onrender.com/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://taller-backend-bvai.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },

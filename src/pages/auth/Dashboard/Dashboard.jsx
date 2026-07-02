@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
 import StatCard from "../../../components/StatCard";
+import Vehiculos from "../../vehiculos/Vehiculos";
 
 export default function Dashboard() {
 
@@ -67,7 +68,11 @@ export default function Dashboard() {
         }
 
         {
-          module !== "dashboard" &&
+          module === "vehiculos" && <Vehiculos />
+        }
+
+        {
+          module !== "dashboard" && module !== "vehiculos" &&
           (
             <div className="module">
 
