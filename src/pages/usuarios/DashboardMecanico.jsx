@@ -56,6 +56,7 @@ export default function DashboardMecanico() {
       <main className="dashboard-content">
         <Header title={header.title} subtitle={header.subtitle} />
         {renderContent()}
+        <Footer />
       </main>
     </div>
   );
