@@ -3,6 +3,7 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
+import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -33,26 +34,39 @@ const welcome = {
 export default function DashboardMecanico() {
   const [module, setModule] = useState("dashboard");
 
+  function renderContent() {
+    switch (module) {
+      case "diagnosticos":
+        return <Diagnosticos />;
+      default:
+        return (
+          <>
+            <div className="cards">
+              {cards.map((card) => (
+                <StatCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  color={card.color}
+                />
+              ))}
+            </div>
+            <div className="welcome">
+              <h2>{welcome.title}</h2>
+              <p>{welcome.subtitle}</p>
+            </div>
+          </>
+        );
+    }
+  }
+
   return (
     <div className="dashboard">
       <Sidebar modules={modules} active={module} onSelect={setModule} />
       <div className="dashboard-main">
         <Header title={header.title} subtitle={header.subtitle} />
         <main className="dashboard-content">
-          <div className="cards">
-            {cards.map((card) => (
-              <StatCard
-                key={card.title}
-                title={card.title}
-                value={card.value}
-                color={card.color}
-              />
-            ))}
-          </div>
-          <div className="welcome">
-            <h2>{welcome.title}</h2>
-            <p>{welcome.subtitle}</p>
-          </div>
+          {renderContent()}
         </main>
         <Footer />
       </div>

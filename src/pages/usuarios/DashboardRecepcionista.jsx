@@ -4,6 +4,7 @@ import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
+import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -39,6 +40,8 @@ export default function DashboardRecepcionista() {
     switch (module) {
       case "cliente":
         return <ClientesModule />;
+      case "diagnosticos":
+        return <Diagnosticos />;
       default:
         return (
           <>
