@@ -3,6 +3,43 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usuarioService } from "../../services/usuarioService";
 
+// ============================================================================
+// PATRÓN DE DISEÑO: STRATEGY
+// ----------------------------------------------------------------------------
+// Cada rol define su propia "estrategia" de redirección (a dónde navegar).
+// En vez de un if/else que conozca cada rol, tenemos un registro de
+// estrategias intercambiables. Esto ES el patrón Strategy: se encapsula
+// un algoritmo (la ruta a la que se navega) por cada caso, y el código
+// cliente (handleSubmit) las usa sin saber los detalles internos de cada una.
+// ============================================================================
+const roleNavigationStrategies = {
+  admin: { route: "/dashboardAdmin" },          // Estrategia para rol "admin"
+  administrador: { route: "/dashboardAdmin" },  // Estrategia para rol "administrador"
+  mecanico: { route: "/dashboardMecanico" },    // Estrategia para rol "mecanico"
+  recepcionista: { route: "/dashboardRecepcionista" }, // Estrategia para rol "recepcionista"
+
+  // ==========================================================================
+  // PRINCIPIO SOLID: OPEN/CLOSED (OCP)
+  // --------------------------------------------------------------------------
+  // Este objeto está ABIERTO A EXTENSIÓN: para soportar un rol nuevo
+  // (ej. "supervisor") solo se agrega una línea aquí:
+  //
+  //   supervisor: { route: "/dashboardSupervisor" },
+  //
+  // y está CERRADO A MODIFICACIÓN: no hay que tocar handleSubmit ni
+  // resolveNavigationStrategy, que ya están probados y funcionando.
+  // ==========================================================================
+};
+
+// ----------------------------------------------------------------------------
+// PATRÓN STRATEGY: "selector de estrategia" (contexto).
+// Esta función decide en tiempo de ejecución CUÁL estrategia usar,
+// según el rol que llega del backend, sin conocer la lógica de cada rol.
+// ----------------------------------------------------------------------------
+function resolveNavigationStrategy(rol) {
+  return roleNavigationStrategies[rol] ?? null;
+}
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -13,42 +50,46 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!username.trim() || !password.trim()) {
-    setError("Por favor completa todos los campos");
-    return;
-  }
-
-  setIsLoading(true);
-  setError("");
-
-  try {
-    const response = await usuarioService.login(username.trim(), password.trim());
-    
-    if (response && response.token) {
-      login(response); 
-      
-      const rol = response.rol || response.usuario?.rol || response.user?.rol;
-
-      if (rol === "admin" || rol === "administrador") {
-        navigate("/dashboardAdmin");
-      } else if (rol === "mecanico") {
-        navigate("/dashboardMecanico");
-      } else if (rol === "recepcionista") {
-        navigate("/dashboardRecepcionista");
-      } else {
-        setError("Rol de usuario no reconocido en el sistema");
-      }
-    } else {
-      throw new Error("Credenciales inválidas");
+    if (!username.trim() || !password.trim()) {
+      setError("Por favor completa todos los campos");
+      return;
     }
-  } catch (err) {
-    setError(err.message || "Error al conectar con el servidor");
-  } finally {
-    setIsLoading(false);
-  }
-};
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await usuarioService.login(username.trim(), password.trim());
+
+      if (response && response.token) {
+        login(response);
+
+        const rol = response.rol || response.usuario?.rol || response.user?.rol;
+
+        // PATRÓN STRATEGY EN USO:
+        // handleSubmit (el "cliente") NO conoce los roles concretos
+        // ("admin", "mecanico", etc.). Solo pide la estrategia que le
+        // corresponde al rol recibido y la ejecuta. Antes esto era un
+        // if/else if/else que sí conocía cada rol explícitamente.
+        const strategy = resolveNavigationStrategy(rol);
+
+        if (strategy) {
+          // Ejecuta el algoritmo encapsulado en la estrategia (navegar a su ruta).
+          navigate(strategy.route);
+        } else {
+          setError("Rol de usuario no reconocido en el sistema");
+        }
+      } else {
+        throw new Error("Credenciales inválidas");
+      }
+    } catch (err) {
+      setError(err.message || "Error al conectar con el servidor");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="login-root">
