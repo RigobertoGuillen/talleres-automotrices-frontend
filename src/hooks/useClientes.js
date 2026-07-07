@@ -1,81 +1,67 @@
-import { useState, useEffect, useCallback } from "react";
-import {
-  getClientes,
-  searchClientes,
-  createCliente,
-  updateCliente,
-  deleteCliente,
-  getHistorialCliente,
-} from "../services/clientesService";
-
 /**
- * Hook principal para gestión de clientes.
- * Centraliza estado, carga, filtros y operaciones CRUD.
+ * ============================================================
+ * PRINCIPIO SOLID — SRP
+ * ============================================================
+ * Este hook gestiona el estado React del módulo de clientes.
+ * Devuelve `clientes` (lista completa) para que ClientesModule
+ * maneje su propia paginación con getPageSizes.
+ * ============================================================
  */
+
+import { useState, useEffect, useCallback } from "react";
+import { ClienteFacade } from "../pages/clientes/facade/ClienteFacade";
+
 export function useClientes() {
   const [clientes, setClientes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
 
+  // ── Carga ─────────────────────────────────────────────────────────────────
   const load = useCallback(async (query = "", filtro = "") => {
     setLoading(true);
     setError(null);
     try {
-      let data = query ? await searchClientes(query) : await getClientes();
-
-      // Filtros client-side complementarios
-      if (filtro === "con-correo") {
-        data = data.filter((c) => !!c.correo);
-      } else if (filtro === "sin-correo") {
-        data = data.filter((c) => !c.correo);
-      } else if (filtro === "reciente") {
-        const now = new Date();
-        data = data.filter((c) => {
-          const d = new Date(c.fecha_registro);
-          return (
-            d.getMonth() === now.getMonth() &&
-            d.getFullYear() === now.getFullYear()
-          );
-        });
-      }
-
+      /**
+       * FACADE — obtenerClientes devuelve { clientes, total, paginas }
+       * Solo usamos clientes; la paginación la hace ClientesModule.
+       */
+      const { clientes: data } = await ClienteFacade.obtenerClientes(query, filtro);
       setClientes(data);
     } catch (err) {
-      // Axios guarda el mensaje del backend en err.response.data.message
-      const msg =
-        err.response?.data?.message ?? err.message ?? "Error al cargar clientes.";
-      setError(msg);
+      setError(err.response?.data?.message ?? err.message ?? "Error al cargar clientes.");
+      setClientes([]); // garantiza que nunca sea undefined
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  const add = useCallback(async (payload) => {
-    const nuevo = await createCliente(payload);
-    setClientes((prev) => [nuevo, ...prev]);
-    return nuevo;
+  // ── Crear ─────────────────────────────────────────────────────────────────
+  const add = useCallback(async (form) => {
+    const result = await ClienteFacade.crearCliente(form);
+    if (!result.success) return result;
+    setClientes((prev) => [result.data, ...prev]);
+    return result;
   }, []);
 
-  const edit = useCallback(async (id, payload) => {
-    const actualizado = await updateCliente(id, payload);
-    setClientes((prev) => prev.map((c) => (c.id === id ? actualizado : c)));
-    return actualizado;
+  // ── Editar ────────────────────────────────────────────────────────────────
+  const edit = useCallback(async (id, form) => {
+    const result = await ClienteFacade.actualizarCliente(id, form);
+    if (!result.success) return result;
+    setClientes((prev) => prev.map((c) => (c.id === id ? result.data : c)));
+    return result;
   }, []);
 
+  // ── Eliminar ──────────────────────────────────────────────────────────────
   const remove = useCallback(async (id) => {
-    await deleteCliente(id);
+    await ClienteFacade.eliminarCliente(id);
     setClientes((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
-  /**
-   * Devuelve { cliente, historial } tal como lo entrega el backend.
-   */
-  const fetchHistorial = useCallback(async (clienteId, filtros = {}) => {
-    return getHistorialCliente(clienteId, filtros);
+  // ── Historial ─────────────────────────────────────────────────────────────
+  const fetchHistorial = useCallback(async (id, filtros = {}) => {
+    return ClienteFacade.obtenerHistorial(id, filtros);
   }, []);
 
   return { clientes, loading, error, load, add, edit, remove, fetchHistorial };

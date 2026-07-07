@@ -1,3 +1,7 @@
+/**
+ * SRP — ConfirmDialog tiene una sola responsabilidad:
+ * mostrar un diálogo de confirmación genérico.
+ */
 export default function ConfirmDialog({
   open, onClose, onConfirm,
   title, description,
@@ -5,7 +9,6 @@ export default function ConfirmDialog({
   loading = false,
 }) {
   if (!open) return null;
-
   return (
     <div className="cl-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="cl-modal cl-modal--sm">

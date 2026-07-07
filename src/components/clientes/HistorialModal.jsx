@@ -1,10 +1,14 @@
-import { useState, useEffect } from "react";
+/**
+ * SRP — HistorialModal tiene una sola responsabilidad:
+ * mostrar el historial de órdenes de un cliente.
+ */
+import { useState, useEffect, useCallback } from "react";
 
-const BADGE_CLASS = {
-  pendiente:  "cl-badge--pendiente",
-  en_proceso: "cl-badge--en_proceso",
-  completado: "cl-badge--completado",
-  cancelado:  "cl-badge--cancelado",
+const ESTADO_BADGE = {
+  recibido:       { cls: "cl-badge-recibido",    label: "Recibido" },
+  "en reparacion":{ cls: "cl-badge-reparacion",  label: "En reparación" },
+  listo:          { cls: "cl-badge-listo",       label: "Listo" },
+  entregado:      { cls: "cl-badge-entregado",   label: "Entregado" },
 };
 
 function fmtDate(iso) {
@@ -13,59 +17,75 @@ function fmtDate(iso) {
     day: "2-digit", month: "short", year: "numeric",
   });
 }
-function fullName(c) {
-  return [c.primer_nombre, c.segundo_nombre, c.primer_apellido, c.segundo_apellido]
-    .filter(Boolean).join(" ");
-}
-function initials(c) {
-  return `${c.primer_nombre?.[0] ?? ""}${c.primer_apellido?.[0] ?? ""}`;
-}
 
+/**
+ * Props:
+ *  - open, onClose
+ *  - cliente: objeto del cliente
+ *  - fetchHistorial: (id, filtros) => Promise<{ cliente, historial }>
+ */
 export default function HistorialModal({ open, onClose, cliente, fetchHistorial }) {
-  const [historial, setHistorial] = useState([]);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState(null);
+  const [historial, setHistorial]     = useState([]);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState(null);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin]       = useState("");
+
+  const cargar = useCallback(async (filtros = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchHistorial(cliente.id, filtros);
+      setHistorial(res.historial ?? []);
+    } catch (err) {
+      setError(err.response?.data?.message ?? "Error al cargar historial.");
+    } finally {
+      setLoading(false);
+    }
+  }, [cliente, fetchHistorial]);
 
   useEffect(() => {
     if (!open || !cliente) return;
-    setLoading(true);
-    setError(null);
-    fetchHistorial(cliente.id)
-      .then((res) => setHistorial(res.historial ?? []))
-      .catch((err) => {
-        setError(err.response?.data?.message ?? err.message ?? "Error al cargar historial.");
-      })
-      .finally(() => setLoading(false));
-  }, [open, cliente, fetchHistorial]);
+    cargar();
+  }, [open, cliente, cargar]);
+
+  function handleFiltrar() {
+    cargar({ fecha_inicio: fechaInicio || undefined, fecha_fin: fechaFin || undefined });
+  }
 
   if (!open || !cliente) return null;
 
   return (
     <div className="cl-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="cl-modal">
-
-        {/* Header */}
+      <div className="cl-modal" style={{ width: "min(620px, 96vw)" }}>
         <div className="cl-modal__header">
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-            <div className="cl-avatar" style={{ width: 40, height: 40, fontSize: 14 }}>
-              {initials(cliente)}
-            </div>
-            <div>
-              <h2 className="cl-modal__title">{fullName(cliente)}</h2>
-              <p className="cl-modal__desc">Historial de servicios · DNI {cliente.dni ?? "—"}</p>
-            </div>
+          <div>
+            <h2 className="cl-modal__title">Historial de servicios</h2>
+            <p className="cl-modal__desc">{cliente.nombre}</p>
           </div>
           <button className="cl-modal__close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Chips info */}
-        <div className="cl-hist-inforow">
-          <span className="cl-chip">📞 {cliente.telefono}</span>
-          {cliente.correo && <span className="cl-chip">✉ {cliente.correo}</span>}
-          {cliente.ciudad && (
-            <span className="cl-chip">
-              📍 {cliente.ciudad}{cliente.departamento ? `, ${cliente.departamento}` : ""}
-            </span>
+        {/* Filtro por fecha */}
+        <div style={{ padding: "0 1.4rem 1rem", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div className="cl-field" style={{ flex: 1, minWidth: 130 }}>
+            <label className="cl-label">Desde</label>
+            <input className="cl-input" type="date" value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)} />
+          </div>
+          <div className="cl-field" style={{ flex: 1, minWidth: 130 }}>
+            <label className="cl-label">Hasta</label>
+            <input className="cl-input" type="date" value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)} />
+          </div>
+          <button className="cl-btn cl-btn--secondary" onClick={handleFiltrar}
+            style={{ height: 36, marginBottom: 0 }}>
+            Filtrar
+          </button>
+          {(fechaInicio || fechaFin) && (
+            <button className="cl-btn cl-btn--ghost" onClick={() => {
+              setFechaInicio(""); setFechaFin(""); cargar();
+            }} style={{ height: 36 }}>✕</button>
           )}
         </div>
 
@@ -73,65 +93,53 @@ export default function HistorialModal({ open, onClose, cliente, fetchHistorial 
 
         <div className="cl-modal__body">
           <p className="cl-section-label">
-            Órdenes de trabajo ({historial.length})
+            Órdenes registradas ({historial.length})
           </p>
 
-          {loading && <div className="cl-loading">Cargando historial…</div>}
+          {loading && <div style={{ textAlign: "center", padding: "1.5rem", color: "#5A5880", fontSize: 13 }}>Cargando historial…</div>}
           {error   && <div className="cl-error">⚠ {error}</div>}
 
           {!loading && !error && historial.length === 0 && (
             <div className="cl-empty">
               <span className="cl-empty__icon">📋</span>
               <p className="cl-empty__title">Sin órdenes registradas</p>
-              <p className="cl-empty__desc">Este cliente no tiene órdenes de trabajo aún.</p>
+              <p className="cl-empty__desc">Este cliente no tiene órdenes de trabajo.</p>
             </div>
           )}
 
           {!loading && !error && historial.length > 0 && (
-            <div className="cl-hist-list">
-              {historial.map((o) => (
-                <div key={o.id} className="cl-hist-card">
-                  <div className="cl-hist-card__header">
-                    <div className="cl-hist-card__left">
-                      <span className="cl-orden-num">Orden #{o.id}</span>
-                      <span className={`cl-badge ${BADGE_CLASS[o.estado] ?? "cl-badge--default"}`}>
-                        {o.estado ?? "pendiente"}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {historial.map((o, i) => {
+                const badge = ESTADO_BADGE[o.estado] ?? { cls: "cl-badge-neutral", label: o.estado };
+                return (
+                  <div key={o.id ?? i} style={{
+                    border: "1px solid rgba(108,99,255,0.12)",
+                    borderRadius: 10, background: "#0D0F1A", overflow: "hidden",
+                  }}>
+                    <div style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "10px 14px", borderBottom: "1px solid rgba(108,99,255,0.1)",
+                      flexWrap: "wrap", gap: 6,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#E8E6FF" }}>
+                          Orden #{o.numero_orden ?? o.id}
+                        </span>
+                        <span className={`cl-badge ${badge.cls}`}>{badge.label}</span>
+                      </div>
+                      <span style={{ fontSize: 12, color: "#5A5880" }}>
+                        {fmtDate(o.fecha_ingreso)}
                       </span>
                     </div>
-                    <span className="cl-hist-fecha">{fmtDate(o.fecha_ingreso)}</span>
-                  </div>
-                  <div className="cl-hist-card__body">
-                    <div className="cl-info-row">
-                      <span className="cl-info-row__label">Vehículo</span>
-                      <span className="cl-info-row__value">
-                        {o.modelo ?? "—"} · {o.placa ?? "—"}
-                      </span>
+                    <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 3 }}>
+                      <InfoRow label="Vehículo"   value={`${o.modelo ?? "—"} · ${o.placa ?? "—"}`} />
+                      <InfoRow label="Mecánico"   value={o.mecanico_nombre ?? "No asignado"} />
+                      {o.descripcion_falla && <InfoRow label="Falla"      value={o.descripcion_falla} />}
+                      {o.diagnostico_observaciones && <InfoRow label="Diagnóstico" value={o.diagnostico_observaciones} />}
                     </div>
-                    <div className="cl-info-row">
-                      <span className="cl-info-row__label">Mecánico</span>
-                      <span className="cl-info-row__value">{o.mecanico_nombre ?? "No asignado"}</span>
-                    </div>
-                    {o.decripcion_falla && (
-                      <div className="cl-info-row">
-                        <span className="cl-info-row__label">Falla</span>
-                        <span className="cl-info-row__value">{o.decripcion_falla}</span>
-                      </div>
-                    )}
-                    {o.diagnostico_observaciones && (
-                      <div className="cl-info-row">
-                        <span className="cl-info-row__label">Diagnóstico</span>
-                        <span className="cl-info-row__value">{o.diagnostico_observaciones}</span>
-                      </div>
-                    )}
-                    {o.fecha_entrega && (
-                      <div className="cl-info-row">
-                        <span className="cl-info-row__label">Entrega</span>
-                        <span className="cl-info-row__value">{fmtDate(o.fecha_entrega)}</span>
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -140,6 +148,15 @@ export default function HistorialModal({ open, onClose, cliente, fetchHistorial 
           <button className="cl-btn cl-btn--secondary" onClick={onClose}>Cerrar</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div style={{ display: "flex", gap: 6, fontSize: 12 }}>
+      <span style={{ color: "#5A5880", minWidth: 76, flexShrink: 0 }}>{label}:</span>
+      <span style={{ color: "#C8C6E8" }}>{value}</span>
     </div>
   );
 }
