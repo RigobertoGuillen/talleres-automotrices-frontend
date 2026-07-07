@@ -3,22 +3,22 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
+import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
+import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
-  { key: "ordenes",      label: "Órdenes de Trabajo" },
+  { key: "ordenes",      label: "Mis Órdenes" },
   { key: "diagnosticos", label: "Diagnósticos" },
-  { key: "cliente",      label: "Clientes" },
   { key: "vehiculos",    label: "Vehículos" },
-  { key: "inventario",   label: "Inventario" },
 ];
 
 const cards = [
-  { title: "Órdenes activas",   value: 5,          color: "#6C63FF" },
-  { title: "Clientes",          value: "4",         color: "#63B3ED" },
-  { title: "Ingresos cobrados", value: "$2,000.00", color: "#F6AD55" },
-  { title: "Stock bajo",        value: "2",         color: "#FC8181" },
+  { title: "Órdenes asignadas", value: 5, color: "#4CAF50" },
+  { title: "En reparación",     value: 3, color: "#2196F3" },
+  { title: "Completadas hoy",   value: 1, color: "#FF9800" },
+  { title: "Pendientes",        value: 2, color: "#9C27B0" },
 ];
 
 const header = {
@@ -28,7 +28,7 @@ const header = {
 
 const welcome = {
   title: "Bienvenido al Panel de Mecánico",
-  subtitle: "Desde aquí puedes gestionar todo el sistema del taller.",
+  subtitle: "Desde aquí puedes gestionar tus órdenes asignadas.",
 };
 
 export default function DashboardMecanico() {
@@ -36,6 +36,10 @@ export default function DashboardMecanico() {
 
   function renderContent() {
     switch (module) {
+      case "vehiculos":
+        return <Vehiculos />;
+      case "ordenes":
+        return <Ordenesmodule />;
       case "diagnosticos":
         return <Diagnosticos />;
       default:

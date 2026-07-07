@@ -6,6 +6,7 @@ import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
+import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
@@ -55,6 +56,8 @@ export default function DashboardAdmin() {
         return <ClientesModule />;
       case "vehiculos":
         return <Vehiculos />;
+      case "ordenes":
+        return <Ordenesmodule />;
       case "diagnosticos":
         return <Diagnosticos />;
       default:
