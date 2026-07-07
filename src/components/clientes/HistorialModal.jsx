@@ -2,7 +2,7 @@
  * SRP — HistorialModal tiene una sola responsabilidad:
  * mostrar el historial de órdenes de un cliente.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const ESTADO_BADGE = {
   recibido:       { cls: "cl-badge-recibido",    label: "Recibido" },
@@ -31,12 +31,7 @@ export default function HistorialModal({ open, onClose, cliente, fetchHistorial 
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin]       = useState("");
 
-  useEffect(() => {
-    if (!open || !cliente) return;
-    cargar();
-  }, [open, cliente]);
-
-  async function cargar(filtros = {}) {
+  const cargar = useCallback(async (filtros = {}) => {
     setLoading(true);
     setError(null);
     try {
@@ -47,7 +42,12 @@ export default function HistorialModal({ open, onClose, cliente, fetchHistorial 
     } finally {
       setLoading(false);
     }
-  }
+  }, [cliente, fetchHistorial]);
+
+  useEffect(() => {
+    if (!open || !cliente) return;
+    cargar();
+  }, [open, cliente, cargar]);
 
   function handleFiltrar() {
     cargar({ fecha_inicio: fechaInicio || undefined, fecha_fin: fechaFin || undefined });
