@@ -6,6 +6,7 @@ import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
+import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -41,8 +42,12 @@ export default function DashboardRecepcionista() {
     switch (module) {
       case "cliente":
         return <ClientesModule />;
-      case "ordenes": return <Ordenesmodule />;
-      case "vehiculos": return <Vehiculos />;
+      case "ordenes":
+        return <Ordenesmodule />;
+      case "vehiculos":
+        return <Vehiculos />;
+      case "diagnosticos":
+        return <Diagnosticos />;
       default:
         return (
           <>

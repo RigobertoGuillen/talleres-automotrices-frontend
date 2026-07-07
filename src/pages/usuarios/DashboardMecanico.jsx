@@ -5,11 +5,13 @@ import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
+import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 
 const modules = [
-  { key: "dashboard", label: "Dashboard" },
-  { key: "ordenes",   label: "Mis Órdenes" },
-  { key: "vehiculos", label: "Vehículos" },
+  { key: "dashboard",    label: "Dashboard" },
+  { key: "ordenes",      label: "Mis Órdenes" },
+  { key: "diagnosticos", label: "Diagnósticos" },
+  { key: "vehiculos",    label: "Vehículos" },
 ];
 
 const cards = [
@@ -34,14 +36,23 @@ export default function DashboardMecanico() {
 
   function renderContent() {
     switch (module) {
-      case "vehiculos": return <Vehiculos />;
-      case "ordenes": return <Ordenesmodule />;
+      case "vehiculos":
+        return <Vehiculos />;
+      case "ordenes":
+        return <Ordenesmodule />;
+      case "diagnosticos":
+        return <Diagnosticos />;
       default:
         return (
           <>
             <div className="cards">
               {cards.map((card) => (
-                <StatCard key={card.title} title={card.title} value={card.value} color={card.color} />
+                <StatCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  color={card.color}
+                />
               ))}
             </div>
             <div className="welcome">
