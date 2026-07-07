@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import vehiculoService from '../../services/vehiculoService';
-import { searchClientes } from '../../services/clientesService';
+import { apiSearchClientes } from '../../services/clientesService';
 
 const TIPOS = ['Pickup', 'turismo', 'camioneta'];
 const FORM_VACIO = { placa: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
@@ -386,7 +386,7 @@ export default function Vehiculos() {
                       setClienteQuery(e.target.value);
                       setClienteSeleccionado(null);
                       if (e.target.value.trim().length > 1) {
-                        const resultados = await searchClientes(e.target.value);
+                        const resultados = await apiSearchClientes(e.target.value);
                         setClientesSugeridos(resultados || []);
                       } else {
                         setClientesSugeridos([]);
