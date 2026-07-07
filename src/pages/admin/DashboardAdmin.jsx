@@ -5,7 +5,7 @@ import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
-import OrdenesModule from "../../pages/ordenes/OrdenesModule";
+import Vehiculos from "../../pages/vehiculos/Vehiculos";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -20,10 +20,10 @@ const modules = [
 ];
 
 const cards = [
-  { title: "Órdenes Pendientes", value: 12,   color: "#4CAF50" },
-  { title: "Vehículos",          value: "128", color: "#2196F3" },
-  { title: "Diagnósticos",       value: "45",  color: "#FF9800" },
-  { title: "Clientes",           value: "200", color: "#9C27B0" },
+  { title: "Órdenes Pendientes", value: 12,    color: "#6C63FF" },
+  { title: "Vehículos",          value: "128",  color: "#63B3ED" },
+  { title: "Diagnósticos",       value: "45",   color: "#F6AD55" },
+  { title: "Clientes",           value: "200",  color: "#68D391" },
 ];
 
 const header = {
@@ -41,20 +41,30 @@ export default function DashboardAdmin() {
   const navigate = useNavigate();
 
   function handleModule(key) {
-    if (key === "usuarios") { navigate("/usuarios/UserPage"); return; }
+    if (key === "usuarios") {
+      navigate("/usuarios/UserPage");
+      return;
+    }
     setModule(key);
   }
 
   function renderContent() {
     switch (module) {
-      case "cliente":  return <ClientesModule />;
-      case "ordenes":  return <OrdenesModule />;
+      case "cliente":
+        return <ClientesModule />;
+      case "vehiculos":
+        return <Vehiculos />;
       default:
         return (
           <>
             <div className="cards">
               {cards.map((card) => (
-                <StatCard key={card.title} title={card.title} value={card.value} color={card.color} />
+                <StatCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  color={card.color}
+                />
               ))}
             </div>
             <div className="welcome">
@@ -69,8 +79,6 @@ export default function DashboardAdmin() {
   return (
     <div className="dashboard">
       <Sidebar modules={modules} active={module} onSelect={handleModule} />
-
-      {/* dashboard-main separa header fijo del contenido scrollable */}
       <div className="dashboard-main">
         <Header title={header.title} subtitle={header.subtitle} />
         <main className="dashboard-content">

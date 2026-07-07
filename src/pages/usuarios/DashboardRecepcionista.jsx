@@ -4,7 +4,6 @@ import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
 import Footer from "../../components/dashboard/Footer";
 import ClientesModule from "../../pages/clientes/ClientesModule";
-import OrdenesModule from "../../pages/ordenes/OrdenesModule";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -17,10 +16,10 @@ const modules = [
 ];
 
 const cards = [
-  { title: "Órdenes activas",   value: 12,         color: "#4CAF50" },
-  { title: "Clientes",          value: "128",       color: "#2196F3" },
-  { title: "Ingresos cobrados", value: "$2,000.00", color: "#FF9800" },
-  { title: "Stock bajo",        value: "2",         color: "#9C27B0" },
+  { title: "Órdenes activas",   value: 12,         color: "#6C63FF" },
+  { title: "Clientes",          value: "128",       color: "#63B3ED" },
+  { title: "Ingresos cobrados", value: "$2,000.00", color: "#F6AD55" },
+  { title: "Stock bajo",        value: "2",         color: "#FC8181" },
 ];
 
 const header = {
@@ -38,14 +37,19 @@ export default function DashboardRecepcionista() {
 
   function renderContent() {
     switch (module) {
-      case "cliente": return <ClientesModule />;
-      case "ordenes": return <OrdenesModule />;
+      case "cliente":
+        return <ClientesModule />;
       default:
         return (
           <>
             <div className="cards">
               {cards.map((card) => (
-                <StatCard key={card.title} title={card.title} value={card.value} color={card.color} />
+                <StatCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  color={card.color}
+                />
               ))}
             </div>
             <div className="welcome">
