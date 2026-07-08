@@ -8,7 +8,7 @@ import ClientesModule from "../../pages/clientes/ClientesModule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
-
+import ordenes from "../../pages/ordenes/Ordenesmodule";
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
   { key: "ordenes",      label: "Órdenes de Trabajo" },
