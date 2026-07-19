@@ -3,39 +3,19 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usuarioService } from "../../services/usuarioService";
 
-// ============================================================================
-// PATRÓN DE DISEÑO: STRATEGY
-// ----------------------------------------------------------------------------
-// Cada rol define su propia "estrategia" de redirección (a dónde navegar).
-// En vez de un if/else que conozca cada rol, tenemos un registro de
-// estrategias intercambiables. Esto ES el patrón Strategy: se encapsula
-// un algoritmo (la ruta a la que se navega) por cada caso, y el código
-// cliente (handleSubmit) las usa sin saber los detalles internos de cada una.
-// ============================================================================
-const roleNavigationStrategies = {
-  admin: { route: "/dashboardAdmin" },          // Estrategia para rol "admin"
-  administrador: { route: "/dashboardAdmin" },  // Estrategia para rol "administrador"
-  mecanico: { route: "/dashboardMecanico" },    // Estrategia para rol "mecanico"
-  recepcionista: { route: "/dashboardRecepcionista" }, // Estrategia para rol "recepcionista"
+// Imagen del lado izquierdo
+import loginImage from "../../assets/login-superauto.png";
 
-  // ==========================================================================
-  // PRINCIPIO SOLID: OPEN/CLOSED (OCP)
-  // --------------------------------------------------------------------------
-  // Este objeto está ABIERTO A EXTENSIÓN: para soportar un rol nuevo
-  // (ej. "supervisor") solo se agrega una línea aquí:
-  //
-  //   supervisor: { route: "/dashboardSupervisor" },
-  //
-  // y está CERRADO A MODIFICACIÓN: no hay que tocar handleSubmit ni
-  // resolveNavigationStrategy, que ya están probados y funcionando.
-  // ==========================================================================
+// =========================
+// STRATEGY
+// =========================
+const roleNavigationStrategies = {
+  admin: { route: "/dashboardAdmin" },
+  administrador: { route: "/dashboardAdmin" },
+  mecanico: { route: "/dashboardMecanico" },
+  recepcionista: { route: "/dashboardRecepcionista" },
 };
 
-// ----------------------------------------------------------------------------
-// PATRÓN STRATEGY: "selector de estrategia" (contexto).
-// Esta función decide en tiempo de ejecución CUÁL estrategia usar,
-// según el rol que llega del backend, sin conocer la lógica de cada rol.
-// ----------------------------------------------------------------------------
 function resolveNavigationStrategy(rol) {
   return roleNavigationStrategies[rol] ?? null;
 }
@@ -43,6 +23,7 @@ function resolveNavigationStrategy(rol) {
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,25 +42,25 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await usuarioService.login(username.trim(), password.trim());
+      const response = await usuarioService.login(
+        username.trim(),
+        password.trim()
+      );
 
       if (response && response.token) {
         login(response);
 
-        const rol = response.rol || response.usuario?.rol || response.user?.rol;
+        const rol =
+          response.rol ||
+          response.usuario?.rol ||
+          response.user?.rol;
 
-        // PATRÓN STRATEGY EN USO:
-        // handleSubmit (el "cliente") NO conoce los roles concretos
-        // ("admin", "mecanico", etc.). Solo pide la estrategia que le
-        // corresponde al rol recibido y la ejecuta. Antes esto era un
-        // if/else if/else que sí conocía cada rol explícitamente.
         const strategy = resolveNavigationStrategy(rol);
 
         if (strategy) {
-          // Ejecuta el algoritmo encapsulado en la estrategia (navegar a su ruta).
           navigate(strategy.route);
         } else {
-          setError("Rol de usuario no reconocido en el sistema");
+          setError("Rol de usuario no reconocido");
         }
       } else {
         throw new Error("Credenciales inválidas");
@@ -92,156 +73,115 @@ export default function Login() {
   };
 
   return (
-    <div className="login-root">
-      <div className="dots-bg" />
-      <div className="orb orb--main" />
-      <div className="orb orb--accent" />
+    <div className="login-page">
 
-      <div className="login-card">
-        <div className="login-logo">
-          <div className="login-logo__icon">
-            <svg
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" />
-              <path d="M7 11V7a5 5 0 0110 0v4" />
-            </svg>
-          </div>
-          <div>
-            <p className="login-logo__name">TALLER DE MECANICA AUTOMOTRIZ SUPERAUTO</p>
-            <p className="login-logo__sub">Control de acceso</p>
-          </div>
+      {/* Fondo */}
+      <div className="dots-bg"></div>
+      <div className="orb orb1"></div>
+      <div className="orb orb2"></div>
+
+      <div className="login-container">
+
+        {/* PANEL IZQUIERDO */}
+        <div
+          className="login-left"
+          style={{ backgroundImage: `url(${loginImage})` }}
+        >
+          <div className="login-left-overlay"></div>
         </div>
 
-        <h1 className="login-heading">Bienvenido de vuelta</h1>
-        <p className="login-subheading">Ingresa tus credenciales para continuar</p>
+        {/* PANEL DERECHO */}
+        <div className="login-right">
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="login-field">
-            <label htmlFor="username" className="login-label">
-              Usuario
-            </label>
-            <div className="login-input-wrap">
-              <svg
-                className="login-input-icon"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-              </svg>
-              <input
-                id="username"
-                type="text"
-                placeholder="usuario / admin"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  setError("");
-                }}
-                required
-                className="login-input"
-                autoComplete="username"
-              />
-            </div>
-          </div>
+          <div className="login-card">
 
-          <div className="login-field">
-            <label htmlFor="password" className="login-label">
-              Contraseña
-            </label>
-            <div className="login-input-wrap">
-              <svg
-                className="login-input-icon"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError("");
-                }}
-                required
-                className="login-input"
-                autoComplete="current-password"
-              />
-            </div>
-          </div>
+            <span className="login-tag">
+              Sistema de Gestión
+            </span>
 
-          <div className="login-forgot-wrap">
-            <Link to="/recuperar-password" className="login-forgot">
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
+            <h1>
+              Bienvenido <span>de vuelta</span>
+            </h1>
 
-          {error && (
-            <div className="login-error" role="alert">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span>{error}</span>
-            </div>
-          )}
+            <p>
+              Ingresa tus credenciales para continuar.
+            </p>
 
-          <button type="submit" disabled={isLoading} className="login-btn">
-            {isLoading ? (
-              <>
-                <svg
-                  className="login-btn__spinner"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
+            <form onSubmit={handleSubmit}>
+
+              {/* Usuario */}
+              <div className="form-group">
+                <label>Usuario</label>
+
+                <div className="input-container">
+                  <i className="ti ti-user"></i>
+
+                  <input
+                    type="text"
+                    placeholder="usuario"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setError("");
+                    }}
                   />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="form-group">
+                <label>Contraseña</label>
+
+                <div className="input-container">
+                  <i className="ti ti-lock"></i>
+
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError("");
+                    }}
                   />
-                </svg>
-                Procesando…
-              </>
-            ) : (
-              "Ingresar"
-            )}
-          </button>
-        </form>
+
+                  <button
+                    type="button"
+                    className="show-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <i className={showPassword ? "ti ti-eye-off" : "ti ti-eye"}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="forgot-password">
+                <Link to="/recuperar-password">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+
+              {error && (
+                <div className="login-error">
+                  {error}
+                </div>
+              )}
+
+              <button
+                className="login-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Ingresando..." : "Ingresar"}
+              </button>
+
+            </form>
+
+          </div>
+
+        </div>
+
       </div>
+
     </div>
   );
 }

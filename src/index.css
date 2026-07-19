@@ -1,289 +1,300 @@
+/* ============================================================
+   VARIABLES DE PALETA DE COLORES (Morados y Oscuros)
+   ============================================================ */
+:root {
+  /* Fondo principal y textos */
+  --color-login-bg-body: #0D0F1A;   /* Fondo oscuro base, AHORA SÓLIDO */
+  --color-login-bg-card: #111325;   /* Fondo de la tarjeta, sutilmente más claro */
+  --color-login-text-main: #E8E6FF; /* Blanco con tinte morado sutil */
+  --color-login-text-muted: #7B7A9E; /* Gris azulado para subtítulos */
+  --color-login-text-label: #9896B8; /* Gris azulado claro para etiquetas uppercase */
+  --color-login-text-icon: #5A5880; /* Gris azulado oscuro para iconos de input */
+
+  /* Colores de Acento y Botón */
+  --color-login-primary: #6C63FF; /* Morado eléctrico vibrante */
+  --color-login-primary-hover: #9B8FFF; /* Morado más claro para hover */
+  --color-login-gradient: linear-gradient(135deg, #6C63FF, #9B8FFF); /* Degradado de botón */
+
+  /* Bordes y Sombras */
+  --color-login-card-border: rgba(108, 99, 255, 0.18);
+  --color-login-input-border: rgba(108, 99, 255, 0.2);
+  --color-login-card-shadow: rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   RESETEO BÁSICO Y TIPOGRAFÍA
+   ============================================================ */
 html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: #0D0F1A;
+  background: var(--color-login-bg-body);
 }
-.login-root {
+
+.login-page {
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  background: #0D0F1A;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
   position: relative;
   overflow: hidden;
+  color: var(--color-login-text-main);
+  background: var(--color-login-bg-body);
 }
 
-/* Fondo punteado */
-.dots-bg {
-  position: absolute;
-  inset: 0;
-  opacity: 0.15;
-  background-image: radial-gradient(circle, #6C63FF 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-}
-
-/* Orbes difusos (firma visual) */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-.orb--main {
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle at 50% 50%, rgba(108, 99, 255, 0.2) 0%, transparent 70%);
-  top: -100px;
-  right: -80px;
-}
-.orb--accent {
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle at 50% 50%, rgba(99, 179, 237, 0.12) 0%, transparent 70%);
-  bottom: -80px;
-  left: -60px;
-}
-
-/* Tarjeta principal */
-.login-card {
+/* ============================================================
+   ESTRUCTURA DE DOS COLUMNAS DE PANTALLA COMPLETA
+   ============================================================ */
+.login-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
   position: relative;
   z-index: 2;
-  background: #141626;
-  border: 1px solid rgba(108, 99, 255, 0.18);
-  border-radius: 20px;
-  padding: 40px 36px 36px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.5);
 }
 
-/* Logo */
-.login-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 28px;
+/* PANEL IZQUIERDO: Con el efecto de difuminado */
+.login-left {
+  flex: 1;
+  position: relative;
+  background-size: cover;
+  background-position: left center;
+  background-repeat: no-repeat;
+
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(13, 15, 26, 0.1) 0%, rgba(13, 15, 26, 0.6) 100%);
+    z-index: 1;
+  }
 }
-.login-logo__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #6C63FF, #9B8FFF);
+
+/* PANEL DERECHO: Tarjeta de Login centrada */
+.login-right {
+  flex: 1;
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  color: #fff;
-}
-.login-logo__icon svg {
-  width: 20px;
-  height: 20px;
-}
-.login-logo__name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #E8E6FF;
-  letter-spacing: -0.3px;
-}
-.login-logo__sub {
-  font-size: 12px;
-  color: #7B7A9E;
-  margin-top: 1px;
+  align-items: center;
+  padding: 40px;
+  background: var(--color-login-bg-body);
 }
 
-/* Encabezado */
-.login-heading {
-  font-size: 24px;
+/* ============================================================
+   TARJETA PRINCIPAL (Login Card)
+   ============================================================ */
+.login-card {
+  background: var(--color-login-bg-card);
+  border: 1px solid var(--color-login-card-border);
+  border-radius: 20px;
+  padding: 56px 48px 48px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 12px 64px var(--color-login-card-shadow);
+}
+
+/* ============================================================
+   TEXTOS Y ETIQUETAS
+   ============================================================ */
+.login-card .login-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-login-text-label);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.login-card h1 {
+  font-size: 28px;
   font-weight: 800;
-  color: #E8E6FF;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-}
-.login-subheading {
-  font-size: 13px;
-  color: #7B7A9E;
-  margin-bottom: 28px;
+  color: var(--color-login-text-main);
+  letter-spacing: -0.8px;
+  margin-bottom: 8px;
+  margin-top: 0;
 }
 
-/* Campos */
-.login-field {
-  margin-bottom: 18px;
+.login-card h1 span {
+  font-weight: 500;
 }
-.login-label {
+
+.login-card p {
+  font-size: 14px;
+  color: var(--color-login-text-muted);
+  margin-bottom: 36px;
+  margin-top: 0;
+}
+
+/* ============================================================
+   FORMULARIO Y INPUTS
+   ============================================================ */
+.login-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group label {
   display: block;
   font-size: 11px;
   font-weight: 600;
-  color: #9896B8;
-  letter-spacing: 0.5px;
+  color: var(--color-login-text-label);
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  margin-bottom: 7px;
-}
-.login-input-wrap {
-  box-sizing: border-box;
-}
-.login-input-icon {
-  position: absolute;
-  left: 13px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: #5A5880;
-  pointer-events: none;
-}
-.login-input {
-  width: calc(100%);
-  box-sizing: border-box;
-  background: #0D0F1A;
-  border: 1px solid rgba(108, 99, 255, 0.2);
-  border-radius: 10px;
-  padding: 11px 13px 11px 38px;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  color: #E8E6FF;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.login-input::placeholder {
-  color: #3E3C5E;
-}
-.login-input:focus {
-  border-color: #6C63FF;
+  margin-bottom: 8px;
 }
 
-/* Recuperar contraseña */
-.login-forgot-wrap {
+.input-container {
+  position: relative;
+}
+
+/* Iconos interiores (usuario, candado) — Tabler Icons */
+.input-container > i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-login-text-icon);
+  pointer-events: none;
+  font-size: 16px;
+}
+
+/* Inputs oscuros */
+.input-container input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-login-bg-body);
+  border: 1px solid var(--color-login-input-border);
+  border-radius: 12px;
+  padding: 14px 16px 14px 48px;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  color: var(--color-login-text-main);
+  outline: none;
+  transition: border-color 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.input-container input::placeholder {
+  color: #3E3C5E;
+}
+
+.input-container input:focus {
+  border-color: var(--color-login-primary);
+}
+
+/* ============================================================
+   BOTÓN DE MOSTRAR/OCULTAR CONTRASEÑA (OJO) — SIEMPRE ACTIVO
+   ============================================================ */
+.input-container .show-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-login-text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  z-index: 2;
+  transition: color 0.2s;
+}
+
+.input-container .show-password:hover {
+  color: var(--color-login-primary-hover);
+}
+
+/* Enlace "¿Olvidaste...?" */
+.forgot-password {
   display: flex;
   justify-content: flex-end;
-  margin-top: -6px;
-  margin-bottom: 22px;
+  margin-top: -8px;
+  margin-bottom: 28px;
 }
-.login-forgot {
+
+.forgot-password a {
   font-size: 12px;
   font-weight: 500;
-  color: #6C63FF;
+  color: #8B85FF;
   text-decoration: none;
   transition: color 0.2s;
 }
-.login-forgot:hover {
+
+.forgot-password a:hover {
   color: #9B8FFF;
 }
 
-/* Error */
-.login-error {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: rgba(226, 75, 74, 0.1);
-  border: 1px solid rgba(226, 75, 74, 0.25);
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 16px;
-}
-.login-error svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  color: #E24B4A;
-}
-.login-error span {
-  font-size: 13px;
-  color: #F09595;
-}
-
-/* Botón */
-.login-btn {
+/* ============================================================
+   BOTÓN PRINCIPAL
+   ============================================================ */
+.login-button {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #6C63FF, #9B8FFF);
+  padding: 16px;
+  background: var(--color-login-gradient);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   transition: opacity 0.2s, transform 0.15s;
-  margin-top: 2px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
 }
-.login-btn:hover:not(:disabled) {
-  opacity: 0.88;
+
+.login-button:hover:not(:disabled) {
+  opacity: 0.92;
   transform: translateY(-1px);
 }
-.login-btn:active:not(:disabled) {
+.login-button:active:not(:disabled) {
   transform: scale(0.98);
 }
-.login-btn:disabled {
-  opacity: 0.55;
+.login-button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
-.login-btn__spinner {
-  width: 18px;
-  height: 18px;
-  animation: login-spin 0.8s linear infinite;
-}
-@keyframes login-spin {
-  to { transform: rotate(360deg); }
-}
 
-/* Divisor */
-.login-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 20px 0 16px;
-}
-.login-divider::before,
-.login-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(108, 99, 255, 0.12);
-}
-.login-divider span {
-  font-size: 11px;
-  color: #3E3C5E;
-  white-space: nowrap;
-}
-
-/* Registro */
-.login-register {
-  text-align: center;
-  font-size: 13px;
-  color: #7B7A9E;
-}
-.login-register a {
-  color: #6C63FF;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.login-register a:hover {
-  color: #9B8FFF;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .login-card {
-    padding: 32px 24px 28px;
+/* ============================================================
+   RESPONSIVE LOGIN (tablets y móviles)
+   ============================================================ */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+    height: auto;
   }
-  .login-heading {
-    font-size: 20px;
+  .login-left {
+    height: 40vh;
+    background-position: center;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+  }
+  .login-right {
+    padding: 40px 20px;
   }
 }
 
-/* ============================================
+/* ============================================================
    DASHBOARD — CSS único, sin duplicados
    Paleta: #0D0F1A base · #6C63FF acento
-   ============================================ */
+   ============================================================ */
 
 /* ── Raíz ─────────────────────────────────── */
 .dashboard {
@@ -528,138 +539,82 @@ html, body, #root {
 /* ── StatCards ────────────────────────────── */
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
   position: relative;
-  background: #141626;
-  border: 1px solid rgba(108, 99, 255, 0.13);
-  border-radius: 14px;
-  padding: 22px 20px 20px;
+  background: #111325; /* Mismo fondo del sidebar/header */
+  border: 1px solid rgba(108, 99, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  transform: translateY(-3px);
+  border-color: rgba(108, 99, 255, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
-.stat-card__accent {
+/* Línea de acento dinámico de color en el borde izquierdo */
+.stat-card::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--card-accent, #6C63FF);
-  border-radius: 14px 14px 0 0;
+  width: 4px;
+  height: 100%;
+  background: var(--card-accent-color, #6C63FF);
+  border-radius: 4px 0 0 4px;
 }
 
 .stat-card__title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  color: #5A5880;
+  color: #7B7A9E; /* Gris azulado de tu paleta */
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin: 0 0 10px;
+  letter-spacing: 0.5px;
+  margin: 0;
 }
 
 .stat-card__value {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 800;
-  color: #E8E6FF;
-  letter-spacing: -1.5px;
+  color: #E8E6FF; /* Blanco brillante con tinte morado */
+  letter-spacing: -1px;
   margin: 0;
   line-height: 1;
 }
 
-/* ── Welcome card ─────────────────────────── */
+/* ── Sección de Bienvenida ────────────────── */
 .welcome {
-  margin-top: 20px;
-  background: #141626;
-  border: 1px solid rgba(108, 99, 255, 0.13);
-  border-radius: 14px;
-  padding: 28px 28px 26px;
+  background: linear-gradient(135deg, rgba(17, 19, 37, 0.8) 0%, rgba(13, 15, 26, 0.9) 100%);
+  border: 1px solid rgba(108, 99, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 .welcome h2 {
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 700;
   color: #E8E6FF;
+  margin: 0 0 8px 0;
   letter-spacing: -0.3px;
-  margin: 0 0 8px;
 }
 
 .welcome p {
-  font-size: 13px;
+  font-size: 14px;
   color: #7B7A9E;
   margin: 0;
-}
-
-/* ── Footer ───────────────────────────────── */
-.dash-footer {
-  border-top: 1px solid rgba(108, 99, 255, 0.1);
-  background: #111325;
-  padding: 11px 28px;
-  flex-shrink: 0;
-}
-
-.dash-footer__inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.dash-footer__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #5A5880;
-}
-
-.dash-footer__brand svg {
-  color: #6C63FF;
-}
-
-.dash-footer__sep {
-  color: #3E3C5E;
-  font-size: 12px;
-}
-
-.dash-footer__text {
-  font-size: 12px;
-  color: #3E3C5E;
-}
-
-/* ── Responsive ───────────────────────────── */
-@media (max-width: 1024px) {
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .dash-sidebar {
-    display: none;
-  }
-  .cards {
-    grid-template-columns: 1fr 1fr;
-  }
-  .dashboard-content {
-    padding: 16px;
-  }
-  .dash-header {
-    padding: 0 16px;
-  }
-}
-
-@media (max-width: 400px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
+  line-height: 1.5;
 }
