@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
@@ -21,13 +21,6 @@ const modules = [
   { key: "usuarios",     label: "Gestión de Usuarios" },
 ];
 
-const cards = [
-  { title: "Órdenes Pendientes", value: 12,    color: "#6C63FF" },
-  { title: "Vehículos",          value: "128",  color: "#63B3ED" },
-  { title: "Diagnósticos",       value: "45",   color: "#F6AD55" },
-  { title: "Clientes",           value: "200",  color: "#68D391" },
-];
-
 const header = {
   title: "Taller Mecánica Automotriz SuperAuto",
   subtitle: "Usted está identificado como Administrador",
@@ -35,12 +28,41 @@ const header = {
 
 const welcome = {
   title: "Bienvenido al Panel Administrativo",
-  subtitle: "Desde aquí puedes gestionar todo el sistema del taller.",
+  subtitle: "El sistema se encuentra sincronizado con la base de datos en tiempo real.",
 };
 
 export default function DashboardAdmin() {
   const [module, setModule] = useState("dashboard");
+  const [stats, setStats] = useState({
+    ordenesProgreso: 0,
+    vehiculosListos: 0,
+    diagnosticosPendientes: 0,
+    alertasInventario: 0,
+  });
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Llamada al endpoint para traer las métricas reales
+  useEffect(() => {
+    if (module === "dashboard") {
+      setLoading(true);
+      
+      // Ajusta el puerto si tu backend corre en uno diferente al 5000
+      fetch("http://localhost:5000/api/dashboard/stats")
+        .then((res) => {
+          if (!res.ok) throw new Error("Error al obtener las métricas");
+          return res.json();
+        })
+        .then((data) => {
+          setStats(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error cargando estadísticas del dashboard:", err);
+          setLoading(false);
+        });
+    }
+  }, [module]);
 
   function handleModule(key) {
     if (key === "usuarios") {
@@ -64,14 +86,34 @@ export default function DashboardAdmin() {
         return (
           <>
             <div className="cards">
-              {cards.map((card) => (
-                <StatCard
-                  key={card.title}
-                  title={card.title}
-                  value={card.value}
-                  color={card.color}
-                />
-              ))}
+              {loading ? (
+                <p style={{ color: "#7B7A9E", gridColumn: "1/-1", fontSize: "14px" }}>
+                  Cargando métricas operativas...
+                </p>
+              ) : (
+                <>
+                  <StatCard
+                    title="Órdenes en Progreso"
+                    value={stats.ordenesProgreso}
+                    color="#6C63FF"
+                  />
+                  <StatCard
+                    title="Vehículos por Retirar"
+                    value={stats.vehiculosListos}
+                    color="#68D391"
+                  />
+                  <StatCard
+                    title="Diagnósticos Pendientes"
+                    value={stats.diagnosticosPendientes}
+                    color="#F6AD55"
+                  />
+                  <StatCard
+                    title="Alertas de Inventario"
+                    value={stats.alertasInventario}
+                    color="#E24B4A" // Color rojo directo de tu botón de logout para advertencia
+                  />
+                </>
+              )}
             </div>
             <div className="welcome">
               <h2>{welcome.title}</h2>
