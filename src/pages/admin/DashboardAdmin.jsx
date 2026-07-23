@@ -47,8 +47,8 @@ export default function DashboardAdmin() {
     if (module === "dashboard") {
       setLoading(true);
       
-      // Ajusta el puerto si tu backend corre en uno diferente al 5000
-      fetch("http://localhost:5000/api/dashboard/stats")
+      
+      fetch("http://localhost:3000/api/dashboard/stats")
         .then((res) => {
           if (!res.ok) throw new Error("Error al obtener las métricas");
           return res.json();
