@@ -1,3 +1,4 @@
+import api from "../../services/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
@@ -46,15 +47,9 @@ export default function DashboardAdmin() {
   useEffect(() => {
     if (module === "dashboard") {
       setLoading(true);
-      
-      
-      fetch("http://localhost:3000/api/dashboard/stats")
+      api.get("/dashboard/stats")
         .then((res) => {
-          if (!res.ok) throw new Error("Error al obtener las métricas");
-          return res.json();
-        })
-        .then((data) => {
-          setStats(data);
+          setStats(res.data);
           setLoading(false);
         })
         .catch((err) => {
