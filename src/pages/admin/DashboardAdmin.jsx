@@ -8,6 +8,7 @@ import ClientesModule from "../../pages/clientes/ClientesModule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
+import CatalogoServicios from "../../pages/servicios/CatalogoServicios";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -15,6 +16,7 @@ const modules = [
   { key: "diagnosticos", label: "Diagnósticos" },
   { key: "cliente",      label: "Clientes" },
   { key: "vehiculos",    label: "Vehículos" },
+  { key: "servicios",    label: "Catálogo de Servicios" },
   { key: "inventario",   label: "Inventario" },
   { key: "facturación",  label: "Facturación" },
   { key: "reportes",     label: "Reportes" },
@@ -82,6 +84,8 @@ export default function DashboardAdmin() {
         return <Ordenesmodule />;
       case "diagnosticos":
         return <Diagnosticos />;
+      case "servicios":
+        return <CatalogoServicios />;
       default:
         return (
           <>

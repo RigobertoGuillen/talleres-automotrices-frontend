@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useOrdenes } from "../../hooks/useOrdenes";
 import Ordenform from "../../components/ordenes/Ordenform";
@@ -6,6 +6,7 @@ import Asignarmecanicomodal from "../../components/ordenes/Asignarmecanicomodal"
 import Actualizarestadomodal from "../../components/ordenes/Actualizarestadomodal";
 import Ordendetallemodal from "../../components/ordenes/Ordendetallemodal";
 import { crearContextoOrden } from "../../pages/ordenes/state/Ordenstate";
+import Paginacion, { getPageSizes } from "../../components/common/Paginacion";
 import "../../pages/ordenes/Ordenes.css";
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -38,12 +39,14 @@ export default function Ordenesmodule() {
 
   function handleSearch(val) {
     setQuery(val);
+    setPagina(1);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load({ estado: filtroEstado }), 350);
   }
 
   function handleFiltroEstado(val) {
     setFiltroEstado(val);
+    setPagina(1);
     load({ estado: val });
   }
 
@@ -54,6 +57,17 @@ export default function Ordenesmodule() {
       .filter(Boolean).join(" ").toLowerCase();
     return hay.includes(query.toLowerCase());
   });
+
+  // ── Paginación ───────────────────────────────────────────────────────────
+  const [pagina, setPagina] = useState(1);
+  const pageSizes  = getPageSizes(filtradas.length);
+  const totalPaginas = pageSizes.length;
+  const offset     = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
+  const paginadas  = filtradas.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+
+  useEffect(() => {
+    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
+  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Toast ────────────────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -247,7 +261,7 @@ export default function Ordenesmodule() {
               </td></tr>
             )}
 
-            {!loading && filtradas.map((o) => {
+            {!loading && paginadas.map((o) => {
               // PATRÓN STATE — obtener badge desde el contexto
               const ctx = crearContextoOrden(o);
               return (
@@ -284,6 +298,14 @@ export default function Ordenesmodule() {
           </tbody>
         </table>
       </div>
+
+      <Paginacion
+        paginaActual={pagina}
+        totalPaginas={totalPaginas}
+        totalItems={filtradas.length}
+        itemLabel="orden"
+        onCambiarPagina={setPagina}
+      />
 
       {/* Modales */}
       <Ordenform

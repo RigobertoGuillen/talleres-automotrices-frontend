@@ -1,81 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import diagnosticoService from '../../services/diagnosticoService';
+import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
+import '../../styles/dashboard-dark.css';
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado'];
 const FORM_VACIO = { orden_id: '', descripcion_falla: '', observaciones: '', recomendaciones: '', estado: 'pendiente' };
 
-// ── Estilos compartidos ────────────────────────────────────────────────────────
-
-const s = {
-  btnPrimario: {
-    background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-    color: '#fff', border: 'none', padding: '10px 20px',
-    borderRadius: 10, fontFamily: 'Segoe UI, sans-serif',
-    fontWeight: 600, fontSize: 13, cursor: 'pointer',
-  },
-  btnSecundario: {
-    background: '#f3f4f6', color: '#374151',
-    border: '1px solid #d1d5db', padding: '10px 20px',
-    borderRadius: 10, fontFamily: 'Segoe UI, sans-serif',
-    fontWeight: 600, fontSize: 13, cursor: 'pointer',
-  },
-  tabla: { width: '100%', borderCollapse: 'collapse' },
-  th: {
-    padding: '12px 16px', textAlign: 'left', fontSize: 11,
-    fontWeight: 600, color: '#6b7280', textTransform: 'uppercase',
-    letterSpacing: '0.5px', borderBottom: '1px solid #e5e7eb',
-    background: '#f9fafb',
-  },
-  td: { padding: '12px 16px', fontSize: 13, color: '#374151', borderBottom: '1px solid #f3f4f6' },
-  label: {
-    display: 'block', fontSize: 11, fontWeight: 600,
-    color: '#6b7280', letterSpacing: '0.5px',
-    textTransform: 'uppercase', marginBottom: 6,
-  },
-  input: {
-    width: '100%', padding: '9px 12px', border: '1px solid #e5e7eb',
-    borderRadius: 8, fontSize: 13, fontFamily: 'Segoe UI, sans-serif',
-    outline: 'none', boxSizing: 'border-box', color: '#374151',
-    background: '#fff',
-  },
-  overlay: {
-    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-  },
-  modal: {
-    background: '#fff', borderRadius: 16, padding: 32,
-    width: '100%', maxWidth: 600,
-    boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-    maxHeight: '92vh', overflowY: 'auto',
-  },
-  errorBox: {
-    background: '#fee2e2', color: '#991b1b',
-    border: '1px solid #fecaca', borderRadius: 8,
-    padding: '10px 14px', fontSize: 13, marginBottom: 16,
-  },
-  toast: {
-    position: 'fixed', bottom: 24, right: 24, zIndex: 1100,
-    background: '#111827', color: '#fff', padding: '12px 20px',
-    borderRadius: 10, fontSize: 13, fontWeight: 500,
-    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-  },
-};
-
 const badgeEstado = (estado) => {
   const m = {
-    pendiente: ['#dbeafe', '#1e40af'],
-    'en proceso': ['#fef3c7', '#92400e'],
-    completado: ['#d1fae5', '#065f46'],
+    pendiente: ['rgba(108,99,255,0.12)', '#9B8FFF'],
+    'en proceso': ['rgba(251,191,36,0.12)', '#FBD000'],
+    completado: ['rgba(72,187,120,0.12)', '#68D391'],
   };
-  const [bg, color] = m[estado] || ['#f3f4f6', '#374151'];
-  return { background: bg, color, padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 };
+  const [bg, color] = m[estado] || ['rgba(160,160,160,0.1)', '#888'];
+  return { background: bg, color };
 };
-
-const btnAccion = (color) => ({
-  background: color, color: '#fff', border: 'none',
-  padding: '5px 12px', borderRadius: 6, fontSize: 12,
-  cursor: 'pointer', marginRight: 6, fontWeight: 500,
-});
 
 function fmtFecha(iso) {
   if (!iso) return '—';
@@ -83,8 +22,6 @@ function fmtFecha(iso) {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 }
-
-// ── Componente principal ───────────────────────────────────────────────────────
 
 export default function Diagnosticos() {
   const [diagnosticos, setDiagnosticos] = useState([]);
@@ -107,6 +44,17 @@ export default function Diagnosticos() {
   const [ordenHistorial, setOrdenHistorial] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
+
+  // ── Paginación ────────────────────────────────────────────────────────────
+  const [pagina, setPagina] = useState(1);
+  const pageSizes    = getPageSizes(diagnosticos.length);
+  const totalPaginas = pageSizes.length;
+  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
+  const diagnosticosPagina = diagnosticos.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+
+  useEffect(() => {
+    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
+  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function mostrarToast(msg) {
     setToast(msg);
@@ -217,45 +165,43 @@ export default function Diagnosticos() {
   // Vista historial por orden
   if (ordenHistorial) {
     return (
-      <div>
+      <div className="dt-page">
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
-          <button onClick={cerrarHistorial} style={s.btnSecundario}>← Volver</button>
+          <button onClick={cerrarHistorial} className="dt-btn dt-btn--secondary">← Volver</button>
           <div>
-            <h2 style={{ margin: 0, color: '#111827', fontSize: 22, fontWeight: 700 }}>
+            <h1 style={{ margin: 0, color: '#E8E6FF', fontSize: 22, fontWeight: 700 }}>
               Historial de diagnósticos — Orden #{ordenHistorial}
-            </h2>
-            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>
+            </h1>
+            <p style={{ margin: '4px 0 0', color: '#7B7A9E', fontSize: 13 }}>
               Ordenado del más reciente al más antiguo
             </p>
           </div>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 14, overflow: 'hidden' }}>
+        <div className="dt-table-card">
           {cargandoHistorial ? (
-            <p style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Cargando historial...</p>
+            <p className="dt-loading">Cargando historial...</p>
           ) : historial.length === 0 ? (
-            <p style={{ padding: 40, textAlign: 'center', color: '#9ca3af' }}>
-              Esta orden no tiene diagnósticos registrados.
-            </p>
+            <p className="dt-empty">Esta orden no tiene diagnósticos registrados.</p>
           ) : (
-            <table style={s.tabla}>
+            <table className="dt-table">
               <thead>
                 <tr>
                   {['Falla', 'Observaciones', 'Recomendaciones', 'Estado', 'Mecánico', 'Registrado', 'Actualizado'].map(col => (
-                    <th key={col} style={s.th}>{col}</th>
+                    <th key={col}>{col}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {historial.map((d, i) => (
-                  <tr key={d.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
-                    <td style={{ ...s.td, maxWidth: 220 }}>{d.descripcion_falla}</td>
-                    <td style={{ ...s.td, maxWidth: 200 }}>{d.observaciones || '—'}</td>
-                    <td style={{ ...s.td, maxWidth: 200 }}>{d.recomendaciones || '—'}</td>
-                    <td style={s.td}><span style={badgeEstado(d.estado)}>{d.estado}</span></td>
-                    <td style={s.td}>{d.mecanico || '—'}</td>
-                    <td style={s.td}>{fmtFecha(d.fecha_registro)}</td>
-                    <td style={s.td}>{fmtFecha(d.fecha_actualizacion)}</td>
+                {historial.map((d) => (
+                  <tr key={d.id}>
+                    <td style={{ maxWidth: 220 }}>{d.descripcion_falla}</td>
+                    <td style={{ maxWidth: 200 }}>{d.observaciones || '—'}</td>
+                    <td style={{ maxWidth: 200 }}>{d.recomendaciones || '—'}</td>
+                    <td><span className="dt-badge" style={badgeEstado(d.estado)}>{d.estado}</span></td>
+                    <td>{d.mecanico || '—'}</td>
+                    <td>{fmtFecha(d.fecha_registro)}</td>
+                    <td>{fmtFecha(d.fecha_actualizacion)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -268,29 +214,29 @@ export default function Diagnosticos() {
 
   // Vista lista
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h2 style={{ margin: 0, color: '#ffffff', fontSize: 22, fontWeight: 700 }}>Diagnósticos</h2>
-          <p style={{ margin: '4px 0 0', color: '#ffffff', fontSize: 13 }}>Diagnósticos técnicos de las órdenes de trabajo</p>
+    <div className="dt-page">
+      <div className="dt-header">
+        <div className="dt-header__left">
+          <h1>Diagnósticos</h1>
+          <p>Diagnósticos técnicos de las órdenes de trabajo</p>
         </div>
-        <button onClick={abrirCrear} style={s.btnPrimario}>+ Registrar diagnóstico</button>
+        <button onClick={abrirCrear} className="dt-btn dt-btn--primary">+ Registrar diagnóstico</button>
       </div>
 
       {/* HU17: busqueda y filtro por estado */}
-      <div style={{ background: '#fff', borderRadius: 14, padding: '14px 20px', marginBottom: 16, display: 'flex', gap: 12 }}>
+      <div className="dt-filters">
         <input
           type="text"
           placeholder="Buscar por falla, observaciones o recomendaciones..."
           value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          style={{ ...s.input, flex: 1 }}
+          onChange={e => { setBusqueda(e.target.value); setPagina(1); }}
+          className="dt-search-input"
         />
         <select
           value={filtroEstado}
-          onChange={e => setFiltroEstado(e.target.value)}
-          style={{ ...s.input, width: 200 }}
+          onChange={e => { setFiltroEstado(e.target.value); setPagina(1); }}
+          className="dt-select"
+          style={{ width: 200 }}
         >
           <option value="">Todos los estados</option>
           {ESTADOS.map(estado => (
@@ -299,34 +245,34 @@ export default function Diagnosticos() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div style={{ background: '#fff', borderRadius: 14, overflow: 'hidden' }}>
+      <div className="dt-table-card">
         {cargando ? (
-          <p style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Cargando diagnósticos...</p>
+          <p className="dt-loading">Cargando diagnósticos...</p>
         ) : error ? (
-          <p style={{ padding: 40, textAlign: 'center', color: '#dc2626' }}>{error}</p>
+          <p className="dt-empty">{error}</p>
         ) : diagnosticos.length === 0 ? (
-          <p style={{ padding: 40, textAlign: 'center', color: '#9ca3af' }}>
+          <p className="dt-empty">
             {busqueda || filtroEstado ? 'Sin resultados para ese criterio.' : 'No hay diagnósticos registrados.'}
           </p>
         ) : (
-          <table style={s.tabla}>
+          <table className="dt-table">
             <thead>
               <tr>
                 {['Orden', 'Falla', 'Estado', 'Mecánico', 'Registrado', 'Acciones'].map(col => (
-                  <th key={col} style={s.th}>{col}</th>
+                  <th key={col}>{col}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {diagnosticos.map((d, i) => (
-                <tr key={d.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
-                  <td style={s.td}>#{d.orden_id}</td>
-                  <td style={{ ...s.td, maxWidth: 260 }}>{d.descripcion_falla}</td>
-                  <td style={s.td}>
+              {diagnosticosPagina.map((d) => (
+                <tr key={d.id}>
+                  <td>#{d.orden_id}</td>
+                  <td style={{ maxWidth: 260 }}>{d.descripcion_falla}</td>
+                  <td>
                     <select
                       value={d.estado}
                       onChange={e => cambiarEstado(d, e.target.value)}
+                      className="dt-badge"
                       style={{ ...badgeEstado(d.estado), border: 'none', cursor: 'pointer' }}
                     >
                       {ESTADOS.map(estado => (
@@ -334,11 +280,11 @@ export default function Diagnosticos() {
                       ))}
                     </select>
                   </td>
-                  <td style={s.td}>{d.mecanico || '—'}</td>
-                  <td style={s.td}>{fmtFecha(d.fecha_registro)}</td>
-                  <td style={s.td}>
-                    <button onClick={() => abrirObservaciones(d)} style={btnAccion('#2563eb')}>Observaciones</button>
-                    <button onClick={() => verHistorialOrden(d.orden_id)} style={btnAccion('#16a34a')}>Historial orden</button>
+                  <td>{d.mecanico || '—'}</td>
+                  <td>{fmtFecha(d.fecha_registro)}</td>
+                  <td>
+                    <button onClick={() => abrirObservaciones(d)} className="dt-btn dt-btn--ghost">Observaciones</button>
+                    <button onClick={() => verHistorialOrden(d.orden_id)} className="dt-btn dt-btn--ghost">Historial orden</button>
                   </td>
                 </tr>
               ))}
@@ -347,22 +293,30 @@ export default function Diagnosticos() {
         )}
       </div>
 
+      <Paginacion
+        paginaActual={pagina}
+        totalPaginas={totalPaginas}
+        totalItems={diagnosticos.length}
+        itemLabel="diagnóstico"
+        onCambiarPagina={setPagina}
+      />
+
       {/* Modal HU14: registrar diagnostico */}
       {modalAbierto && (
-        <div style={s.overlay}>
-          <div style={s.modal}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontWeight: 700, color: '#111827' }}>Registrar Diagnóstico</h3>
-              <button onClick={cerrarModal} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#6b7280' }}>×</button>
+        <div className="dt-overlay">
+          <div className="dt-modal">
+            <div className="dt-modal__header">
+              <h3 className="dt-modal__title">Registrar Diagnóstico</h3>
+              <button onClick={cerrarModal} className="dt-modal__close">×</button>
             </div>
 
-            {errorModal && <div style={s.errorBox}>{errorModal}</div>}
+            {errorModal && <div className="dt-field-error">{errorModal}</div>}
 
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>ID Orden de Trabajo *</label>
+                <label className="dt-label">ID Orden de Trabajo *</label>
                 <input
-                  style={s.input} type="number" required min={1}
+                  className="dt-input" type="number" required min={1}
                   placeholder="ID numérico de la orden"
                   value={form.orden_id}
                   onChange={e => setForm(f => ({ ...f, orden_id: e.target.value }))}
@@ -370,9 +324,9 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>Descripción de la falla *</label>
+                <label className="dt-label">Descripción de la falla *</label>
                 <textarea
-                  style={{ ...s.input, minHeight: 70, resize: 'vertical' }} required
+                  className="dt-textarea" required
                   placeholder="Describe la falla encontrada"
                   value={form.descripcion_falla}
                   onChange={e => setForm(f => ({ ...f, descripcion_falla: e.target.value }))}
@@ -380,9 +334,9 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>Observaciones</label>
+                <label className="dt-label">Observaciones</label>
                 <textarea
-                  style={{ ...s.input, minHeight: 60, resize: 'vertical' }}
+                  className="dt-textarea"
                   placeholder="Observaciones adicionales (opcional)"
                   value={form.observaciones}
                   onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))}
@@ -390,9 +344,9 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>Recomendaciones</label>
+                <label className="dt-label">Recomendaciones</label>
                 <textarea
-                  style={{ ...s.input, minHeight: 60, resize: 'vertical' }}
+                  className="dt-textarea"
                   placeholder="Recomendaciones (opcional)"
                   value={form.recomendaciones}
                   onChange={e => setForm(f => ({ ...f, recomendaciones: e.target.value }))}
@@ -400,9 +354,9 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>Estado</label>
+                <label className="dt-label">Estado</label>
                 <select
-                  style={s.input}
+                  className="dt-select-field"
                   value={form.estado}
                   onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}
                 >
@@ -413,8 +367,8 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-                <button type="button" onClick={cerrarModal} style={s.btnSecundario}>Cancelar</button>
-                <button type="submit" disabled={guardando} style={{ ...s.btnPrimario, opacity: guardando ? 0.6 : 1 }}>
+                <button type="button" onClick={cerrarModal} className="dt-btn dt-btn--secondary">Cancelar</button>
+                <button type="submit" disabled={guardando} className="dt-btn dt-btn--primary">
                   {guardando ? 'Guardando...' : 'Registrar'}
                 </button>
               </div>
@@ -425,22 +379,22 @@ export default function Diagnosticos() {
 
       {/* Modal HU15: observaciones */}
       {observacionesTarget && (
-        <div style={s.overlay}>
-          <div style={s.modal}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontWeight: 700, color: '#111827' }}>
+        <div className="dt-overlay">
+          <div className="dt-modal">
+            <div className="dt-modal__header">
+              <h3 className="dt-modal__title">
                 Observaciones — Orden #{observacionesTarget.orden_id}
               </h3>
-              <button onClick={cerrarObservaciones} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#6b7280' }}>×</button>
+              <button onClick={cerrarObservaciones} className="dt-modal__close">×</button>
             </div>
 
-            {errorObs && <div style={s.errorBox}>{errorObs}</div>}
+            {errorObs && <div className="dt-field-error">{errorObs}</div>}
 
             <form onSubmit={guardarObservaciones}>
               <div style={{ marginBottom: 14 }}>
-                <label style={s.label}>Observaciones *</label>
+                <label className="dt-label">Observaciones *</label>
                 <textarea
-                  style={{ ...s.input, minHeight: 120, resize: 'vertical' }} required
+                  className="dt-textarea" required style={{ minHeight: 120 }}
                   placeholder="Escribe las observaciones del diagnóstico"
                   value={observacionesTexto}
                   onChange={e => setObservacionesTexto(e.target.value)}
@@ -448,8 +402,8 @@ export default function Diagnosticos() {
               </div>
 
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-                <button type="button" onClick={cerrarObservaciones} style={s.btnSecundario}>Cancelar</button>
-                <button type="submit" disabled={guardandoObs} style={{ ...s.btnPrimario, opacity: guardandoObs ? 0.6 : 1 }}>
+                <button type="button" onClick={cerrarObservaciones} className="dt-btn dt-btn--secondary">Cancelar</button>
+                <button type="submit" disabled={guardandoObs} className="dt-btn dt-btn--primary">
                   {guardandoObs ? 'Guardando...' : 'Guardar observaciones'}
                 </button>
               </div>
@@ -458,7 +412,7 @@ export default function Diagnosticos() {
         </div>
       )}
 
-      {toast && <div style={s.toast}>{toast}</div>}
+      {toast && <div className="dt-toast dt-toast--success">{toast}</div>}
     </div>
   );
 }
