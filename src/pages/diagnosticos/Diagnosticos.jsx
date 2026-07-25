@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import diagnosticoService from '../../services/diagnosticoService';
-
 import Paginacion from '../../components/clientes/Paginacion';
-
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
 import '../../styles/dashboard-dark.css';
-
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado'];
 const FORM_VACIO = { orden_id: '', descripcion_falla: '', observaciones: '', recomendaciones: '', estado: 'pendiente' };
@@ -50,17 +46,6 @@ export default function Diagnosticos() {
   const [ordenHistorial, setOrdenHistorial] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
-
-  // ── Paginación ────────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes    = getPageSizes(diagnosticos.length);
-  const totalPaginas = pageSizes.length;
-  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const diagnosticosPagina = diagnosticos.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
-
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function mostrarToast(msg) {
     setToast(msg);
@@ -276,19 +261,11 @@ export default function Diagnosticos() {
               </tr>
             </thead>
             <tbody>
-
-              {diagnosticosPagina.map((d, i) => (
-                <tr key={d.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
-                  <td style={s.td}>#{d.orden_id}</td>
-                  <td style={{ ...s.td, maxWidth: 260 }}>{d.descripcion_falla}</td>
-                  <td style={s.td}>
-
               {diagnosticosPagina.map((d) => (
                 <tr key={d.id}>
                   <td>#{d.orden_id}</td>
                   <td style={{ maxWidth: 260 }}>{d.descripcion_falla}</td>
                   <td>
-
                     <select
                       value={d.estado}
                       onChange={e => cambiarEstado(d, e.target.value)}
@@ -313,25 +290,14 @@ export default function Diagnosticos() {
         )}
       </div>
 
-
       {!cargando && !error && diagnosticos.length > 0 && (
         <Paginacion
           paginaActual={pagina}
           totalPaginas={totalPaginas}
           totalClientes={diagnosticos.length}
           onCambiarPagina={setPagina}
-          entidad="diagnóstico"
         />
       )}
-
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={diagnosticos.length}
-        itemLabel="diagnóstico"
-        onCambiarPagina={setPagina}
-      />
-
 
       {/* Modal HU14: registrar diagnostico */}
       {modalAbierto && (

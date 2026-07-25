@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import servicioService from '../../services/servicioService';
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
+import Paginacion from '../../components/clientes/Paginacion';
 import '../../styles/dashboard-dark.css';
 
 const FORM_VACIO = { nombre: '', descripcion: '', precio_base: '' };
+const PAGE_SIZE = 8;
 
 const fmtPrecio = (valor) =>
   new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(Number(valor) || 0);
@@ -20,6 +21,7 @@ export default function CatalogoServicios() {
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [pagina, setPagina] = useState(1);
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [servicioEditar, setServicioEditar] = useState(null);
@@ -50,16 +52,11 @@ export default function CatalogoServicios() {
     return sv.nombre?.toLowerCase().includes(q) || sv.descripcion?.toLowerCase().includes(q);
   });
 
-  // ── Paginación ────────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes    = getPageSizes(serviciosFiltrados.length);
-  const totalPaginas = pageSizes.length;
-  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const serviciosPagina = serviciosFiltrados.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+  useEffect(() => { setPagina(1); }, [busqueda]);
 
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
+  const totalPaginas = Math.max(1, Math.ceil(serviciosFiltrados.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const serviciosPagina = serviciosFiltrados.slice(offset, offset + PAGE_SIZE);
 
   const abrirCrear = () => {
     setServicioEditar(null);
@@ -170,13 +167,14 @@ export default function CatalogoServicios() {
         )}
       </div>
 
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={serviciosFiltrados.length}
-        itemLabel="servicio"
-        onCambiarPagina={setPagina}
-      />
+      {!cargando && !error && serviciosFiltrados.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={serviciosFiltrados.length}
+          onCambiarPagina={setPagina}
+        />
+      )}
 
       {modalAbierto && esAdmin && (
         <div className="dt-overlay">

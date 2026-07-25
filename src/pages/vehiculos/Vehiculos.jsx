@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import vehiculoService from '../../services/vehiculoService';
 import { apiSearchClientes } from '../../services/clientesService';
-
 import Paginacion from '../../components/clientes/Paginacion';
-
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
 import '../../styles/dashboard-dark.css';
-
 
 const TIPOS = ['Pickup', 'turismo', 'camioneta'];
 const FORM_VACIO = { placa: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
@@ -85,24 +81,11 @@ export default function Vehiculos() {
     );
   });
 
-
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const totalPaginas = Math.max(1, Math.ceil(vehiculosFiltrados.length / PAGE_SIZE));
   const offset = (pagina - 1) * PAGE_SIZE;
   const vehiculosPagina = vehiculosFiltrados.slice(offset, offset + PAGE_SIZE);
-
-  // ── Paginación ────────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes    = getPageSizes(vehiculosFiltrados.length);
-  const totalPaginas = pageSizes.length;
-  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const vehiculosPagina = vehiculosFiltrados.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
-
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
-
 
   const abrirCrear = () => {
     setVehiculoEditar(null);
@@ -256,19 +239,6 @@ export default function Vehiculos() {
               </tr>
             </thead>
             <tbody>
-
-              {vehiculosPagina.map((v, i) => (
-                <tr key={v.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
-                  <td style={s.td}><span style={badgePlaca}>{v.placa}</span></td>
-                  <td style={s.td}>{v.marca}</td>
-                  <td style={s.td}>{v.modelo}</td>
-                  <td style={s.td}>{v.anio}</td>
-                  <td style={s.td}>{v.color || '—'}</td>
-                  <td style={s.td}><span style={badgeTipo(v.tipo)}>{v.tipo}</span></td>
-                  <td style={s.td}>
-                    <button onClick={() => abrirEditar(v)} style={btnAccion('#2563eb')}>Editar</button>
-                    <button onClick={() => verHistorial(v)} style={btnAccion('#16a34a')}>Historial</button>
-
               {vehiculosPagina.map((v) => (
                 <tr key={v.id}>
                   <td><span className="dt-badge" style={{ background: 'rgba(108,99,255,0.12)', color: '#9B8FFF' }}>{v.placa}</span></td>
@@ -280,7 +250,6 @@ export default function Vehiculos() {
                   <td>
                     <button onClick={() => abrirEditar(v)} className="dt-btn dt-btn--ghost">Editar</button>
                     <button onClick={() => verHistorial(v)} className="dt-btn dt-btn--ghost">Historial</button>
-
                   </td>
                 </tr>
               ))}
@@ -289,25 +258,14 @@ export default function Vehiculos() {
         )}
       </div>
 
-
       {!cargando && !error && vehiculosFiltrados.length > 0 && (
         <Paginacion
           paginaActual={pagina}
           totalPaginas={totalPaginas}
           totalClientes={vehiculosFiltrados.length}
           onCambiarPagina={setPagina}
-          entidad="vehículo"
         />
       )}
-
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={vehiculosFiltrados.length}
-        itemLabel="vehículo"
-        onCambiarPagina={setPagina}
-      />
-
 
       {modalAbierto && (
         <div className="dt-overlay">

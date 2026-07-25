@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import facturacionService from '../../services/facturacionService';
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
+import Paginacion from '../../components/clientes/Paginacion';
 import '../../styles/dashboard-dark.css';
 
 const METODOS_PAGO = ['efectivo', 'tarjeta', 'transferencia'];
+const PAGE_SIZE = 8;
 
 const fmtMonto = (valor) =>
   new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(Number(valor) || 0);
@@ -18,6 +19,7 @@ export default function Facturas() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  const [pagina, setPagina] = useState(1);
 
   const [facturaDetalle, setFacturaDetalle] = useState(null);
   const [detalleItems, setDetalleItems] = useState([]);
@@ -54,15 +56,11 @@ export default function Facturas() {
     );
   });
 
-  const [pagina, setPagina] = useState(1);
-  const pageSizes = getPageSizes(facturasFiltradas.length);
-  const totalPaginas = pageSizes.length;
-  const offset = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const facturasPagina = facturasFiltradas.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+  useEffect(() => { setPagina(1); }, [busqueda]);
 
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
+  const totalPaginas = Math.max(1, Math.ceil(facturasFiltradas.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const facturasPagina = facturasFiltradas.slice(offset, offset + PAGE_SIZE);
 
   const verDetalle = async (factura) => {
     setFacturaDetalle(factura);
@@ -154,13 +152,14 @@ export default function Facturas() {
         )}
       </div>
 
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={facturasFiltradas.length}
-        itemLabel="factura"
-        onCambiarPagina={setPagina}
-      />
+      {!cargando && facturasFiltradas.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={facturasFiltradas.length}
+          onCambiarPagina={setPagina}
+        />
+      )}
 
       {facturaDetalle && (
         <div className="dt-overlay">
