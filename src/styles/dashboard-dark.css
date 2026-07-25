@@ -1,0 +1,130 @@
+/* ================================================
+   TEMA OSCURO COMPARTIDO DEL DASHBOARD — dashboard-dark.css
+   Misma paleta que Órdenes de Trabajo y Clientes: #0D0F1A + acento #6C63FF
+   Usado por: Vehículos, Diagnósticos, Catálogo de Servicios
+   ================================================ */
+
+.dt-page { display: flex; flex-direction: column; gap: 0; font-family: 'Inter', sans-serif; }
+
+/* ── Header ──────────────────────────────────────── */
+.dt-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap;
+}
+.dt-header__left h1 { font-size: 22px; font-weight: 700; color: #E8E6FF; letter-spacing: -0.4px; margin: 0 0 4px; }
+.dt-header__left p  { font-size: 13px; color: #7B7A9E; margin: 0; }
+
+/* ── Botones ─────────────────────────────────────── */
+.dt-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 38px; padding: 0 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s; border: none;
+}
+.dt-btn--primary { background: linear-gradient(135deg, #6C63FF, #9B8FFF); color: #fff; }
+.dt-btn--primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.dt-btn--secondary { background: #1C1E2E; color: #C8C6E8; border: 1px solid rgba(108,99,255,0.2); }
+.dt-btn--secondary:hover { background: #22253A; }
+.dt-btn--ghost { background: transparent; color: #7B7A9E; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.dt-btn--ghost:hover { background: #1C1E2E; color: #E8E6FF; }
+.dt-btn--danger { background: transparent; color: #F09595; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.dt-btn--danger:hover { background: rgba(226,75,74,0.12); }
+.dt-btn--delete { background: linear-gradient(135deg, #E24B4A, #c0392b); color: #fff; }
+.dt-btn--delete:hover { opacity: 0.88; }
+.dt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Filtros ─────────────────────────────────────── */
+.dt-filters { padding: 14px 20px; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+.dt-search-input, .dt-select {
+  height: 38px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid rgba(108,99,255,0.2); background: #141626;
+  color: #E8E6FF; font-size: 13px; font-family: 'Inter', sans-serif;
+  outline: none; box-sizing: border-box; transition: border-color 0.2s;
+}
+.dt-search-input { flex: 1; }
+.dt-search-input::placeholder { color: #3E3C5E; }
+.dt-search-input:focus, .dt-select:focus { border-color: #6C63FF; }
+.dt-select { cursor: pointer; }
+.dt-select option { background: #141626; }
+
+/* ── Error ───────────────────────────────────────── */
+.dt-error {
+  background: rgba(226,75,74,0.08); border: 1px solid rgba(226,75,74,0.22);
+  border-radius: 10px; padding: 10px 14px; font-size: 13px;
+  color: #F09595; margin-bottom: 1rem;
+}
+
+/* ── Tabla ───────────────────────────────────────── */
+.dt-table-card { border: 1px solid rgba(108,99,255,0.12); border-radius: 14px; overflow: hidden; background: #141626; }
+.dt-table { width: 100%; border-collapse: collapse; }
+.dt-table thead { background: #0D0F1A; }
+.dt-table th {
+  padding: 11px 16px; font-size: 11px; font-weight: 600; color: #5A5880;
+  text-align: left; text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(108,99,255,0.1);
+}
+.dt-table td { padding: 13px 16px; font-size: 13px; color: #C8C6E8; border-bottom: 1px solid rgba(108,99,255,0.07); vertical-align: middle; }
+.dt-table tbody tr:last-child td { border-bottom: none; }
+.dt-table tbody tr { transition: background 0.12s; }
+.dt-table tbody tr:hover { background: rgba(108,99,255,0.04); }
+
+/* ── Celdas ──────────────────────────────────────── */
+.dt-name { font-size: 13px; font-weight: 500; color: #E8E6FF; }
+.dt-sub  { font-size: 12px; color: #5A5880; margin-top: 2px; }
+
+/* ── Badges ──────────────────────────────────────── */
+.dt-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 6px; white-space: nowrap;
+}
+
+/* ── Empty / Loading ─────────────────────────────── */
+.dt-empty { text-align: center; padding: 3.5rem 1rem; color: #5A5880; }
+.dt-loading { text-align: center; padding: 2.5rem; font-size: 13px; color: #5A5880; }
+
+/* ── Overlay / Modal ─────────────────────────────── */
+.dt-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; backdrop-filter: blur(2px);
+}
+.dt-modal {
+  background: #141626; border-radius: 16px; padding: 32px;
+  border: 1px solid rgba(108,99,255,0.18);
+  width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.dt-modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.dt-modal__title { margin: 0; font-weight: 700; color: #E8E6FF; font-size: 17px; }
+.dt-modal__close { background: none; border: none; font-size: 22px; cursor: pointer; color: #5A5880; }
+.dt-modal__close:hover { color: #E8E6FF; }
+
+/* ── Form ────────────────────────────────────────── */
+.dt-label { display: block; font-size: 11px; font-weight: 600; color: #9896B8; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; }
+.dt-input, .dt-select-field, .dt-textarea {
+  width: 100%; padding: 9px 12px; border-radius: 10px;
+  border: 1px solid rgba(108,99,255,0.18); background: #0D0F1A;
+  color: #E8E6FF; font-size: 13px; font-family: 'Inter', sans-serif;
+  outline: none; box-sizing: border-box; transition: border-color 0.2s;
+}
+.dt-textarea { min-height: 70px; resize: vertical; }
+.dt-input::placeholder, .dt-textarea::placeholder { color: #3E3C5E; }
+.dt-input:focus, .dt-select-field:focus, .dt-textarea:focus { border-color: #6C63FF; }
+.dt-select-field option { background: #141626; }
+.dt-field-error {
+  background: rgba(226,75,74,0.08); color: #F09595;
+  border: 1px solid rgba(226,75,74,0.22); border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; margin-bottom: 16px;
+}
+
+/* ── Toast ───────────────────────────────────────── */
+.dt-toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  padding: 11px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif;
+  z-index: 1100; max-width: 300px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.dt-toast--success { background: #0D1F18; border: 1px solid rgba(72,187,120,0.3); color: #68D391; }
+.dt-toast--error   { background: #1F0D0D; border: 1px solid rgba(226,75,74,0.3); color: #F09595; }

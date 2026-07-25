@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useOrdenes } from "../../hooks/useOrdenes";
 import Ordenform from "../../components/ordenes/Ordenform";
@@ -7,6 +7,7 @@ import Actualizarestadomodal from "../../components/ordenes/Actualizarestadomoda
 import Ordendetallemodal from "../../components/ordenes/Ordendetallemodal";
 import Paginacion from "../../components/clientes/Paginacion";
 import { crearContextoOrden } from "../../pages/ordenes/state/Ordenstate";
+import Paginacion, { getPageSizes } from "../../components/common/Paginacion";
 import "../../pages/ordenes/Ordenes.css";
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -44,14 +45,22 @@ export default function Ordenesmodule() {
 
   function handleSearch(val) {
     setQuery(val);
+
     setPaginaActual(1); // reset al buscar
+
+    setPagina(1);
+
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load({ estado: filtroEstado }), 350);
   }
 
   function handleFiltroEstado(val) {
     setFiltroEstado(val);
+
     setPaginaActual(1); // reset al filtrar
+
+    setPagina(1);
+
     load({ estado: val });
   }
 
@@ -62,6 +71,7 @@ export default function Ordenesmodule() {
       .filter(Boolean).join(" ").toLowerCase();
     return hay.includes(query.toLowerCase());
   });
+
 
   // Recorte de la página actual sobre el resultado ya filtrado
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
@@ -75,6 +85,18 @@ export default function Ordenesmodule() {
     if (p < 1 || p > totalPaginas) return;
     setPaginaActual(p);
   }
+
+  // ── Paginación ───────────────────────────────────────────────────────────
+  const [pagina, setPagina] = useState(1);
+  const pageSizes  = getPageSizes(filtradas.length);
+  const totalPaginas = pageSizes.length;
+  const offset     = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
+  const paginadas  = filtradas.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+
+  useEffect(() => {
+    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
+  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   // ── Toast ────────────────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -307,10 +329,18 @@ export default function Ordenesmodule() {
       </div>
 
       <Paginacion
+
         paginaActual={paginaSegura}
         totalPaginas={totalPaginas}
         totalClientes={filtradas.length}
         onCambiarPagina={handleCambiarPagina}
+
+        paginaActual={pagina}
+        totalPaginas={totalPaginas}
+        totalItems={filtradas.length}
+        itemLabel="orden"
+        onCambiarPagina={setPagina}
+
       />
 
       {/* Modales */}

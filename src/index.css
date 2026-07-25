@@ -424,6 +424,53 @@ html, body, #root {
   flex-shrink: 0;
 }
 
+/* ── Sub menú (items anidados) ──────────────── */
+.dash-sidebar__chevron {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: transform 0.15s;
+}
+.dash-sidebar__chevron--open {
+  transform: rotate(180deg);
+}
+
+.dash-sidebar__submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 0 4px 34px;
+}
+
+.dash-sidebar__subitem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #7B7A9E;
+  font-size: 12.5px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dash-sidebar__subitem:hover {
+  background: rgba(108, 99, 255, 0.09);
+  color: #C8C6E8;
+}
+
+.dash-sidebar__subitem--active {
+  background: rgba(108, 99, 255, 0.16);
+  color: #9B8FFF;
+  font-weight: 600;
+}
+
 /* ── Header ───────────────────────────────── */
 .dash-header {
   display: flex;
