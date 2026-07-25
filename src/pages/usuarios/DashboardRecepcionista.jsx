@@ -7,6 +7,7 @@ import ClientesModule from "../../pages/clientes/ClientesModule";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
+import Inventario from "../../pages/inventario/Inventario";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -48,6 +49,8 @@ export default function DashboardRecepcionista() {
         return <Vehiculos />;
       case "diagnosticos":
         return <Diagnosticos />;
+      case "inventario":
+        return <Inventario rol="recepcionista" />;
       default:
         return (
           <>

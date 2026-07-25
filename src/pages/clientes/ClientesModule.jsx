@@ -4,77 +4,52 @@ import { useClientes } from "../../hooks/useClientes";
 import ClienteForm from "../../components/clientes/ClienteForm";
 import HistorialModal from "../../components/clientes/HistorialModal";
 import ConfirmDialog from "../../components/clientes/ConfirmDialog";
+import Paginacion from "../../components/clientes/Paginacion";
 import "../../pages/clientes/clientes.css";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 // El backend devuelve campos aplanados: primer_nombre, primer_apellido,
 // colonia, ciudad, departamento — NO como objeto anidado "direcciones"
- 
+
 function fullName(c) {
   return [c.primer_nombre, c.segundo_nombre, c.primer_apellido, c.segundo_apellido]
     .filter(Boolean).join(" ");
 }
- 
-function initials(c) {
-  return `${c.primer_nombre?.[0] ?? ""}${c.primer_apellido?.[0] ?? ""}`.toUpperCase();
-}
- 
+
 function fmtDate(iso) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("es-HN", {
     day: "2-digit", month: "short", year: "2-digit",
   });
 }
- 
-// ── Colores rotativos de avatares ──────────────────────────────────────────
-const AVATAR_COLORS = [
-  { bg: "rgba(108,99,255,0.18)", color: "#9B8FFF" },
-  { bg: "rgba(99,179,237,0.18)", color: "#63B3ED" },
-  { bg: "rgba(72,187,120,0.18)", color: "#68D391" },
-  { bg: "rgba(246,173,85,0.18)", color: "#F6AD55" },
-];
- 
-// ── Paginación variable: primera página 20, resto 10 ──────────────────────
-const PAGE_SIZES = [20, 10];
- 
-function getPageSizes(total) {
-  if (total === 0) return [];
-  const sizes = [];
-  let remaining = total;
-  let first = true;
-  while (remaining > 0) {
-    const size = first ? PAGE_SIZES[0] : PAGE_SIZES[1];
-    sizes.push(Math.min(size, remaining));
-    remaining -= size;
-    first = false;
-  }
-  return sizes;
-}
- 
+
+// ── Paginación: 8 clientes por página ──────────────────────────────────────
+const PAGE_SIZE = 8;
+
 // ── Componente principal ───────────────────────────────────────────────────
 export default function ClientesModule() {
   const { user } = useAuth();
   const esAdmin = user?.rol === "admin" || user?.rol === "administrador";
- 
+
   const { clientes, loading, error, load, add, edit, remove, fetchHistorial } =
     useClientes();
- 
+
   // ── Búsqueda y filtros ────────────────────────────────────────────────────
   const [query, setQuery]   = useState("");
   const [filtro, setFiltro] = useState("");
   const debounceRef = useRef(null);
- 
+
   function handleSearch(val) {
     setQuery(val);
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load(val, filtro), 350);
   }
- 
+
   function handleFiltro(val) {
     setFiltro(val);
     load(query, val);
   }
- 
+
   // ── Modales ───────────────────────────────────────────────────────────────
   const [formOpen, setFormOpen]             = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
@@ -83,24 +58,23 @@ export default function ClientesModule() {
   const [historialCliente, setHistorialCliente] = useState(null);
   const [deleteTarget, setDeleteTarget]     = useState(null);
   const [deleting, setDeleting]             = useState(false);
- 
+
   // ── Paginación ────────────────────────────────────────────────────────────
-  const [page, setPage] = useState(0);
- 
-  const pageSizes    = getPageSizes(clientes.length);
-  const totalPages   = pageSizes.length;
-  const offset       = pageSizes.slice(0, page).reduce((a, b) => a + b, 0);
-  const pageClientes = clientes.slice(offset, offset + (pageSizes[page] ?? 10));
- 
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
+
+  const totalPaginas = Math.max(1, Math.ceil(clientes.length / PAGE_SIZE));
+  const offset        = (pagina - 1) * PAGE_SIZE;
+  const pageClientes  = clientes.slice(offset, offset + PAGE_SIZE);
+
   // ── Toast ─────────────────────────────────────────────────────────────────
   function showToast(msg, type = "success") {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3200);
   }
- 
+
   function openNew()   { setEditingCliente(null); setFormOpen(true); }
   function openEdit(c) { setEditingCliente(c);    setFormOpen(true); }
- 
+
   // ── Guardar ───────────────────────────────────────────────────────────────
   async function handleSave(payload) {
     setSaving(true);
@@ -111,7 +85,7 @@ export default function ClientesModule() {
       } else {
         await add(payload);
         showToast("Cliente registrado correctamente.");
-        setPage(0);
+        setPagina(1);
       }
       setFormOpen(false);
     } catch (err) {
@@ -120,7 +94,7 @@ export default function ClientesModule() {
       setSaving(false);
     }
   }
- 
+
   // ── Eliminar ──────────────────────────────────────────────────────────────
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -129,19 +103,19 @@ export default function ClientesModule() {
       await remove(deleteTarget.id);
       showToast("Cliente eliminado.");
       setDeleteTarget(null);
-      const newSizes = getPageSizes(clientes.length - 1);
-      if (page >= newSizes.length) setPage(Math.max(0, newSizes.length - 1));
+      const nuevoTotalPaginas = Math.max(1, Math.ceil((clientes.length - 1) / PAGE_SIZE));
+      if (pagina > nuevoTotalPaginas) setPagina(nuevoTotalPaginas);
     } catch (err) {
       showToast(err.response?.data?.message ?? err.message ?? "Error al eliminar.", "error");
     } finally {
       setDeleting(false);
     }
   }
- 
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="cl-page">
- 
+
       {/* Header */}
       <div className="cl-header">
         <div className="cl-header__left">
@@ -152,7 +126,7 @@ export default function ClientesModule() {
           + Nuevo cliente
         </button>
       </div>
- 
+
       {/* Filtros */}
       <div className="cl-filters">
         <div className="cl-search-wrap">
@@ -175,13 +149,13 @@ export default function ClientesModule() {
           {clientes.length} cliente{clientes.length !== 1 ? "s" : ""}
         </span>
       </div>
- 
+
       {/* Error */}
       {error && <div className="cl-error">⚠ {error}</div>}
- 
+
       {/* Loading */}
       {loading && <div className="cl-loading">Cargando clientes…</div>}
- 
+
       {/* Estado vacío */}
       {!loading && clientes.length === 0 && (
         <div className="cl-empty">
@@ -202,102 +176,68 @@ export default function ClientesModule() {
           )}
         </div>
       )}
- 
-      {/* Grid de tarjetas */}
+
+      {/* Tabla de clientes */}
       {!loading && clientes.length > 0 && (
         <>
-          <div className="cl-page-info">
-            <span>
-              Mostrando <strong>{pageClientes.length}</strong> de{" "}
-              <strong>{clientes.length}</strong> clientes
-            </span>
-            {totalPages > 1 && (
-              <span className="cl-page-badge">
-                Página {page + 1} de {totalPages}
-              </span>
-            )}
+          <div className="cl-table-card">
+            <table className="cl-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Teléfono</th>
+                  <th>Ubicación</th>
+                  <th>DNI</th>
+                  <th>Correo</th>
+                  <th>Registro</th>
+                  <th className="right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageClientes.map((c) => {
+                  // El backend devuelve ciudad/departamento/colonia aplanados
+                  const ciudad = [c.ciudad, c.departamento].filter(Boolean).join(", ");
+
+                  return (
+                    <tr key={c.id}>
+                      <td>
+                        <div className="cl-name">{fullName(c)}</div>
+                        {c.colonia && <div className="cl-sub">{c.colonia}</div>}
+                      </td>
+                      <td>{c.telefono || "—"}</td>
+                      <td>{ciudad || "—"}</td>
+                      <td>{c.dni || "—"}</td>
+                      <td>{c.correo || "—"}</td>
+                      <td className="cl-fecha">{fmtDate(c.fecha_registro)}</td>
+                      <td>
+                        <div className="cl-actions">
+                          <button className="cl-btn cl-btn--ghost" title="Ver historial"
+                            onClick={() => setHistorialCliente(c)}>📋</button>
+                          <button className="cl-btn cl-btn--ghost" title="Editar"
+                            onClick={() => openEdit(c)}>✏️</button>
+                          {esAdmin && (
+                            <button className="cl-btn cl-btn--ghost cl-btn--danger"
+                              title="Eliminar (solo admin)"
+                              onClick={() => setDeleteTarget(c)}>🗑</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
- 
-          <div className="cl-cards-grid">
-            {pageClientes.map((c, i) => {
-              const av = AVATAR_COLORS[(offset + i) % AVATAR_COLORS.length];
-              // El backend devuelve ciudad/departamento/colonia aplanados
-              const ciudad = [c.ciudad, c.departamento].filter(Boolean).join(", ");
- 
-              return (
-                <div key={c.id} className="cl-client-card">
-                  <div className="cl-client-card__top">
-                    <div className="cl-avatar cl-avatar--lg"
-                      style={{ background: av.bg, color: av.color }}>
-                      {initials(c)}
-                    </div>
-                    <div className="cl-client-card__actions">
-                      <button className="cl-btn cl-btn--ghost" title="Ver historial"
-                        onClick={() => setHistorialCliente(c)}>📋</button>
-                      <button className="cl-btn cl-btn--ghost" title="Editar"
-                        onClick={() => openEdit(c)}>✏️</button>
-                      {esAdmin && (
-                        <button className="cl-btn cl-btn--ghost cl-btn--danger"
-                          title="Eliminar (solo admin)"
-                          onClick={() => setDeleteTarget(c)}>🗑</button>
-                      )}
-                    </div>
-                  </div>
- 
-                  <div className="cl-client-card__body">
-                    {/* Nombre completo desde campos separados */}
-                    <p className="cl-client-card__name">{fullName(c)}</p>
-                    {/* Colonia aplanada directamente del backend */}
-                    {c.colonia && <p className="cl-sub">{c.colonia}</p>}
-                  </div>
- 
-                  <div className="cl-client-card__info">
-                    {c.telefono && (
-                      <span className="cl-chip">📞 {c.telefono}</span>
-                    )}
-                    {ciudad && (
-                      <span className="cl-chip">📍 {ciudad}</span>
-                    )}
-                    {c.dni && (
-                      <span className="cl-chip">🪪 {c.dni}</span>
-                    )}
-                    {c.correo ? (
-                      <span className="cl-chip">✉ {c.correo}</span>
-                    ) : (
-                      <span className="cl-chip cl-chip--muted">Sin correo</span>
-                    )}
-                    <span className="cl-chip">📅 {fmtDate(c.fecha_registro)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
- 
-          {/* Paginación */}
-          {totalPages > 1 && (
-            <div className="cl-pagination">
-              <button className="cl-page-btn" disabled={page === 0}
-                onClick={() => setPage(page - 1)}>
-                ← Anterior
-              </button>
-              <div className="cl-page-numbers">
-                {Array.from({ length: totalPages }, (_, idx) => (
-                  <button key={idx}
-                    className={`cl-page-num ${idx === page ? "cl-page-num--active" : ""}`}
-                    onClick={() => setPage(idx)}>
-                    {idx + 1}
-                  </button>
-                ))}
-              </div>
-              <button className="cl-page-btn" disabled={page === totalPages - 1}
-                onClick={() => setPage(page + 1)}>
-                Siguiente →
-              </button>
-            </div>
-          )}
+
+          <Paginacion
+            paginaActual={pagina}
+            totalPaginas={totalPaginas}
+            totalClientes={clientes.length}
+            onCambiarPagina={setPagina}
+          />
         </>
       )}
- 
+
       {/* Modales */}
       <ClienteForm
         open={formOpen}
@@ -306,14 +246,14 @@ export default function ClientesModule() {
         cliente={editingCliente}
         saving={saving}
       />
- 
+
       <HistorialModal
         open={!!historialCliente}
         onClose={() => setHistorialCliente(null)}
         cliente={historialCliente}
         fetchHistorial={fetchHistorial}
       />
- 
+
       {esAdmin && (
         <ConfirmDialog
           open={!!deleteTarget}
@@ -329,7 +269,7 @@ export default function ClientesModule() {
           confirmLabel="Eliminar"
         />
       )}
- 
+
       {toast && (
         <div className={`cl-toast cl-toast--${toast.type}`}>{toast.msg}</div>
       )}

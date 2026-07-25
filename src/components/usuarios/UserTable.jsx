@@ -1,51 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Paginacion from "../../components/clientes/Paginacion";
 import "./usertable.css";
 
-function getInitials(name = "") {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-}
+const PAGE_SIZE = 8;
 
-const AVATAR_COLORS = [
-  { bg: "rgba(108,99,255,0.18)", color: "#9B8FFF" },
-  { bg: "rgba(99,179,237,0.18)", color: "#63B3ED" },
-  { bg: "rgba(72,187,120,0.18)", color: "#68D391" },
-  { bg: "rgba(246,173,85,0.18)", color: "#F6AD55" },
-];
+export default function UserTable({ users, onEdit, onDelete, onToggle, hayFiltro = false }) {
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
 
-const PAGE_SIZES = [20, 10]; // primera página 20, resto 10
+  const totalPaginas = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const offset       = (pagina - 1) * PAGE_SIZE;
+  const pageUsers    = users.slice(offset, offset + PAGE_SIZE);
 
-function getPageSizes(total) {
-  if (total === 0) return [];
-  const sizes = [];
-  let remaining = total;
-  let first = true;
-  while (remaining > 0) {
-    const size = first ? PAGE_SIZES[0] : PAGE_SIZES[1];
-    sizes.push(Math.min(size, remaining));
-    remaining -= size;
-    first = false;
-  }
-  return sizes;
-}
+  useEffect(() => { setPagina(1); }, [users.length, hayFiltro]);
 
-export default function UserTable({ users, onEdit, onDelete, onToggle }) {
-  const [page, setPage] = useState(0);
-
-  const pageSizes = getPageSizes(users.length);
-  const totalPages = pageSizes.length;
-
-  // Calcular offset de la página actual
-  const offset = pageSizes.slice(0, page).reduce((a, b) => a + b, 0);
-  const pageUsers = users.slice(offset, offset + (pageSizes[page] ?? 10));
-
-  // Resetear página si cambian los usuarios
   const handlePageChange = (p) => {
-    setPage(p);
+    setPagina(p);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -57,109 +26,81 @@ export default function UserTable({ users, onEdit, onDelete, onToggle }) {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
         </div>
-        <p className="ut-empty-title">No hay usuarios registrados</p>
-        <p className="ut-empty-desc">Agrega el primer usuario para comenzar.</p>
+        <p className="ut-empty-title">{hayFiltro ? "Sin resultados" : "No hay usuarios registrados"}</p>
+        <p className="ut-empty-desc">
+          {hayFiltro ? "Intenta con otro nombre o nombre de usuario." : "Agrega el primer usuario para comenzar."}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="ut-grid-wrap">
-      {/* Contador de página */}
-      <div className="ut-page-info">
-        <span>Mostrando <strong>{pageUsers.length}</strong> de <strong>{users.length}</strong> usuarios</span>
-        <span className="ut-page-badge">Página {page + 1} de {totalPages}</span>
-      </div>
-
-      {/* Grid de tarjetas */}
-      <div className="ut-grid">
-        {pageUsers.map((user, i) => {
-          const av = AVATAR_COLORS[(offset + i) % AVATAR_COLORS.length];
-          return (
-            <div key={user.id} className="ut-user-card">
-              <div className="ut-user-card__top">
-                <span
-                  className="ut-avatar-lg"
-                  style={{ background: av.bg, color: av.color }}
-                  aria-hidden="true"
-                >
-                  {getInitials(user.nombre_completo)}
-                </span>
-                <span className={`ut-pill ${user.activo ? "activo" : "inactivo"}`}>
-                  <span className="ut-dot" />
-                  {user.activo ? "Activo" : "Inactivo"}
-                </span>
-              </div>
-
-              <div className="ut-user-card__body">
-                <p className="ut-user-card__name">{user.nombre_completo || "—"}</p>
-                <span className="ut-rol-badge">{user.rol ?? "—"}</span>
-              </div>
-
-              <div className="ut-user-card__actions">
-                <button
-                  className="ut-btn"
-                  onClick={() => onEdit(user)}
-                  title="Editar usuario"
-                >
-                  <i className="ti ti-edit" aria-hidden="true" /> Editar
-                </button>
-                <button
-                  className={`ut-btn ${user.activo ? "toggle-on" : "toggle-off"}`}
-                  onClick={() => onToggle(user.id, !user.activo)}
-                  title={user.activo ? "Desactivar usuario" : "Activar usuario"}
-                >
-                  <i
-                    className={`ti ${user.activo ? "ti-toggle-right" : "ti-toggle-left"}`}
-                    aria-hidden="true"
-                  />
-                  {user.activo ? "Desactivar" : "Activar"}
-                </button>
-                <button
-                  className="ut-btn danger"
-                  onClick={() => onDelete(user.id)}
-                  title="Eliminar usuario"
-                >
-                  <i className="ti ti-trash" aria-hidden="true" /> Eliminar
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="ut-pagination">
-          <button
-            className="ut-page-btn"
-            disabled={page === 0}
-            onClick={() => handlePageChange(page - 1)}
-          >
-            ← Anterior
-          </button>
-
-          <div className="ut-page-numbers">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                className={`ut-page-num ${i === page ? "ut-page-num--active" : ""}`}
-                onClick={() => handlePageChange(i)}
-              >
-                {i + 1}
-              </button>
+    <div className="ut-wrap">
+      <div className="ut-table-card">
+        <table className="ut-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th className="right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pageUsers.map((user) => (
+              <tr key={user.id}>
+                <td className="ut-name">{user.nombre_completo || "—"}</td>
+                <td>
+                  <span className="ut-rol-badge">{user.rol ?? "—"}</span>
+                </td>
+                <td>
+                  <span className={`ut-pill ${user.activo ? "activo" : "inactivo"}`}>
+                    <span className="ut-dot" />
+                    {user.activo ? "Activo" : "Inactivo"}
+                  </span>
+                </td>
+                <td>
+                  <div className="ut-actions">
+                    <button
+                      className="ut-btn"
+                      onClick={() => onEdit(user)}
+                      title="Editar usuario"
+                    >
+                      <i className="ti ti-edit" aria-hidden="true" /> Editar
+                    </button>
+                    <button
+                      className={`ut-btn ${user.activo ? "toggle-on" : "toggle-off"}`}
+                      onClick={() => onToggle(user.id, !user.activo)}
+                      title={user.activo ? "Desactivar usuario" : "Activar usuario"}
+                    >
+                      <i
+                        className={`ti ${user.activo ? "ti-toggle-right" : "ti-toggle-left"}`}
+                        aria-hidden="true"
+                      />
+                      {user.activo ? "Desactivar" : "Activar"}
+                    </button>
+                    <button
+                      className="ut-btn danger"
+                      onClick={() => onDelete(user.id)}
+                      title="Eliminar usuario"
+                    >
+                      <i className="ti ti-trash" aria-hidden="true" /> Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
             ))}
-          </div>
+          </tbody>
+        </table>
+      </div>
 
-          <button
-            className="ut-page-btn"
-            disabled={page === totalPages - 1}
-            onClick={() => handlePageChange(page + 1)}
-          >
-            Siguiente →
-          </button>
-        </div>
-      )}
+      <Paginacion
+        paginaActual={pagina}
+        totalPaginas={totalPaginas}
+        totalClientes={users.length}
+        onCambiarPagina={handlePageChange}
+        entidad="usuario"
+      />
     </div>
   );
 }

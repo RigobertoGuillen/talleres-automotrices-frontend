@@ -12,7 +12,17 @@ export default function UserPage() {
   const [editing, setEditing]   = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast]       = useState(null); // { type: "loading"|"success"|"error", msg }
+  const [busqueda, setBusqueda] = useState("");
   const navigate = useNavigate();
+
+  const usuariosFiltrados = users.filter((u) => {
+    if (!busqueda.trim()) return true;
+    const q = busqueda.trim().toLowerCase();
+    return (
+      u.nombre_completo?.toLowerCase().includes(q) ||
+      u.nombre_usuario?.toLowerCase().includes(q)
+    );
+  });
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
@@ -82,7 +92,8 @@ export default function UserPage() {
               <div>
                 <h2 className="up-title">Historial de usuarios</h2>
                 <p className="up-subtitle">
-                  {users.length} usuario{users.length !== 1 ? "s" : ""} registrado{users.length !== 1 ? "s" : ""}
+                  {usuariosFiltrados.length} usuario{usuariosFiltrados.length !== 1 ? "s" : ""}
+                  {busqueda.trim() ? ` de ${users.length}` : " registrado" + (users.length !== 1 ? "s" : "")}
                 </p>
               </div>
             </div>
@@ -91,11 +102,22 @@ export default function UserPage() {
             </button>
           </div>
 
+          <div className="up-search-wrap">
+            <i className="ti ti-search up-search-icon" aria-hidden="true" />
+            <input
+              className="up-search-input"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Buscar por nombre o nombre de usuario…"
+            />
+          </div>
+
           <UserTable
-            users={users}
+            users={usuariosFiltrados}
             onEdit={handleEdit}
             onDelete={removeUser}
             onToggle={changeStatus}
+            hayFiltro={!!busqueda.trim()}
           />
         </>
       )}

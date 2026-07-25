@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import diagnosticoService from '../../services/diagnosticoService';
+import Paginacion from '../../components/clientes/Paginacion';
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado'];
 const FORM_VACIO = { orden_id: '', descripcion_falla: '', observaciones: '', recomendaciones: '', estado: 'pendiente' };
+const PAGE_SIZE = 8;
 
 // ── Estilos compartidos ────────────────────────────────────────────────────────
 
@@ -93,6 +95,7 @@ export default function Diagnosticos() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
@@ -134,6 +137,12 @@ export default function Diagnosticos() {
     const timeout = setTimeout(cargarDiagnosticos, 300);
     return () => clearTimeout(timeout);
   }, [cargarDiagnosticos]);
+
+  useEffect(() => { setPagina(1); }, [filtroEstado, busqueda]);
+
+  const totalPaginas = Math.max(1, Math.ceil(diagnosticos.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const diagnosticosPagina = diagnosticos.slice(offset, offset + PAGE_SIZE);
 
   const abrirCrear = () => {
     setForm(FORM_VACIO);
@@ -319,7 +328,7 @@ export default function Diagnosticos() {
               </tr>
             </thead>
             <tbody>
-              {diagnosticos.map((d, i) => (
+              {diagnosticosPagina.map((d, i) => (
                 <tr key={d.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
                   <td style={s.td}>#{d.orden_id}</td>
                   <td style={{ ...s.td, maxWidth: 260 }}>{d.descripcion_falla}</td>
@@ -346,6 +355,16 @@ export default function Diagnosticos() {
           </table>
         )}
       </div>
+
+      {!cargando && !error && diagnosticos.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={diagnosticos.length}
+          onCambiarPagina={setPagina}
+          entidad="diagnóstico"
+        />
+      )}
 
       {/* Modal HU14: registrar diagnostico */}
       {modalAbierto && (

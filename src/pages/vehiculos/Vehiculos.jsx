@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import vehiculoService from '../../services/vehiculoService';
 import { apiSearchClientes } from '../../services/clientesService';
+import Paginacion from '../../components/clientes/Paginacion';
 
 const TIPOS = ['Pickup', 'turismo', 'camioneta'];
 const FORM_VACIO = { placa: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
+const PAGE_SIZE = 8;
 
 const s = {
   btnPrimario: {
@@ -83,6 +85,7 @@ export default function Vehiculos() {
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [vehiculoEditar, setVehiculoEditar] = useState(null);
@@ -127,6 +130,12 @@ export default function Vehiculos() {
       v.modelo?.toLowerCase().includes(q)
     );
   });
+
+  useEffect(() => { setPagina(1); }, [busqueda]);
+
+  const totalPaginas = Math.max(1, Math.ceil(vehiculosFiltrados.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const vehiculosPagina = vehiculosFiltrados.slice(offset, offset + PAGE_SIZE);
 
   const abrirCrear = () => {
     setVehiculoEditar(null);
@@ -282,7 +291,7 @@ export default function Vehiculos() {
               </tr>
             </thead>
             <tbody>
-              {vehiculosFiltrados.map((v, i) => (
+              {vehiculosPagina.map((v, i) => (
                 <tr key={v.id} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
                   <td style={s.td}><span style={badgePlaca}>{v.placa}</span></td>
                   <td style={s.td}>{v.marca}</td>
@@ -300,6 +309,16 @@ export default function Vehiculos() {
           </table>
         )}
       </div>
+
+      {!cargando && !error && vehiculosFiltrados.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={vehiculosFiltrados.length}
+          onCambiarPagina={setPagina}
+          entidad="vehículo"
+        />
+      )}
 
       {modalAbierto && (
         <div style={s.overlay}>

@@ -6,12 +6,14 @@ import Footer from "../../components/dashboard/Footer";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
+import Inventario from "../../pages/inventario/Inventario";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
   { key: "ordenes",      label: "Mis Órdenes" },
   { key: "diagnosticos", label: "Diagnósticos" },
   { key: "vehiculos",    label: "Vehículos" },
+  { key: "inventario",   label: "Solicitar Repuestos" },
 ];
 
 const cards = [
@@ -42,6 +44,8 @@ export default function DashboardMecanico() {
         return <Ordenesmodule />;
       case "diagnosticos":
         return <Diagnosticos />;
+      case "inventario":
+        return <Inventario rol="mecanico" />;
       default:
         return (
           <>
