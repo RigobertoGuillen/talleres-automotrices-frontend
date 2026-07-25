@@ -7,13 +7,22 @@ import ClientesModule from "../../pages/clientes/ClientesModule";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
+import CatalogoServicios from "../../pages/servicios/CatalogoServicios";
+import ServiciosOrdenPage from "../../pages/servicios/ServiciosOrdenPage";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
   { key: "ordenes",      label: "Órdenes de Trabajo" },
-  { key: "diagnosticos", label: "Diagnósticos" },
+  {
+    key: "diagnosticos", label: "Diagnósticos",
+    children: [
+      { key: "diagnosticos",   label: "Lista de Diagnósticos" },
+      { key: "servicios-orden", label: "Servicios de Orden" },
+    ],
+  },
   { key: "cliente",      label: "Clientes" },
   { key: "vehiculos",    label: "Vehículos" },
+  { key: "servicios",    label: "Catálogo de Servicios" },
   { key: "inventario",   label: "Inventario" },
   { key: "facturación",  label: "Facturación" },
 ];
@@ -48,6 +57,10 @@ export default function DashboardRecepcionista() {
         return <Vehiculos />;
       case "diagnosticos":
         return <Diagnosticos />;
+      case "servicios-orden":
+        return <ServiciosOrdenPage />;
+      case "servicios":
+        return <CatalogoServicios />;
       default:
         return (
           <>
