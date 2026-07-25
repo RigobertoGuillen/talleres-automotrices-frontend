@@ -11,6 +11,9 @@ import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
 import CatalogoServicios from "../../pages/servicios/CatalogoServicios";
 import ServiciosOrdenPage from "../../pages/servicios/ServiciosOrdenPage";
+import GenerarFactura from "../../pages/facturacion/GenerarFactura";
+import Facturas from "../../pages/facturacion/Facturas";
+import ActualizacionesCai from "../../pages/facturacion/ActualizacionesCai";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -26,7 +29,14 @@ const modules = [
   { key: "vehiculos",    label: "Vehículos" },
   { key: "servicios",    label: "Catálogo de Servicios" },
   { key: "inventario",   label: "Inventario" },
-  { key: "facturación",  label: "Facturación" },
+  {
+    key: "facturación", label: "Facturación",
+    children: [
+      { key: "facturacion-generar", label: "Generar Factura" },
+      { key: "facturacion-listado", label: "Facturas" },
+      { key: "facturacion-cai",     label: "Actualizaciones CAI" },
+    ],
+  },
   { key: "reportes",     label: "Reportes" },
   { key: "usuarios",     label: "Gestión de Usuarios" },
 ];
@@ -90,6 +100,12 @@ export default function DashboardAdmin() {
         return <ServiciosOrdenPage />;
       case "servicios":
         return <CatalogoServicios />;
+      case "facturacion-generar":
+        return <GenerarFactura />;
+      case "facturacion-listado":
+        return <Facturas />;
+      case "facturacion-cai":
+        return <ActualizacionesCai />;
       default:
         return (
           <>
