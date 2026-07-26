@@ -104,20 +104,20 @@ export default function Ordenesmodule() {
   }
 
   async function handleAsignar(payload) {
-    setSaving(true);
-    try {
-      await asignar(asignarOrden.id, payload.mecanico_id);
-      showToast("Mecánico asignado correctamente.");
-      setAsignarOrden(null);
-    } catch (err) {
-      showToast(err.response?.data?.message ?? "Error al asignar.", "error");
-    } finally { setSaving(false); }
-  }
+  setSaving(true);
+  try {
+    await asignar(asignarOrden.numero_orden, payload.mecanico_id);
+    showToast("Mecánico asignado correctamente.");
+    setAsignarOrden(null);
+  } catch (err) {
+    showToast(err.response?.data?.message ?? "Error al asignar.", "error");
+  } finally { setSaving(false); }
+}
 
   async function handleReasignar(payload) {
     setSaving(true);
     try {
-      await reasignar(reasignarOrden.id, payload.mecanico_id);
+      await reasignar(reasignarOrden.numero_orden, payload.mecanico_id);
       showToast("Mecánico reasignado correctamente.");
       setReasignarOrden(null);
     } catch (err) {
@@ -126,26 +126,26 @@ export default function Ordenesmodule() {
   }
 
   async function handleEstado(payload) {
-    setSaving(true);
-    try {
-      await updateEstado(estadoOrden.id, payload);
-      showToast("Estado actualizado.");
-      setEstadoOrden(null);
-    } catch (err) {
-      showToast(err.response?.data?.message ?? "Error al actualizar.", "error");
-    } finally { setSaving(false); }
-  }
+  setSaving(true);
+  try {
+    await updateEstado(estadoOrden.numero_orden, payload);
+    showToast("Estado actualizado.");
+    setEstadoOrden(null);
+  } catch (err) {
+    showToast(err.response?.data?.message ?? "Error al actualizar.", "error");
+  } finally { setSaving(false); }
+}
 
   async function handleCerrar(id) {
-    setSaving(true);
-    try {
-      await cerrar(id);
-      showToast("Orden cerrada y disponible para facturación.");
-      setEstadoOrden(null);
-    } catch (err) {
-      showToast(err.response?.data?.message ?? "Error al cerrar.", "error");
-    } finally { setSaving(false); }
-  }
+  setSaving(true);
+  try {
+    await cerrar(id); // este ya recibe numero_orden directamente desde el modal, revisar Actualizarestadomodal
+    showToast("Orden cerrada y disponible para facturación.");
+    setEstadoOrden(null);
+  } catch (err) {
+    showToast(err.response?.data?.message ?? "Error al cerrar.", "error");
+  } finally { setSaving(false); }
+}
 
   // ── Acciones por fila usando patrón State ─────────────────────────────────
   function renderAcciones(o) {
