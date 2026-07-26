@@ -23,7 +23,14 @@ const modules = [
   { key: "cliente",      label: "Clientes" },
   { key: "vehiculos",    label: "Vehículos" },
   { key: "inventario",   label: "Inventario" },
-  { key: "facturación",  label: "Facturación" },
+  {
+    key: "facturación",
+    label: "Facturación",
+    children: [
+      { key: "facturacion-listado", label: "Facturas" },
+      { key: "facturacion-cai",     label: "Actualizaciones CAI" },
+    ],
+  },
   { key: "reportes",     label: "Reportes" },
   { key: "usuarios",     label: "Gestión de Usuarios" },
 ];
