@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useOrdenes } from "../../hooks/useOrdenes";
 import Ordenform from "../../components/ordenes/Ordenform";
 import Asignarmecanicomodal from "../../components/ordenes/Asignarmecanicomodal";
 import Actualizarestadomodal from "../../components/ordenes/Actualizarestadomodal";
 import Ordendetallemodal from "../../components/ordenes/Ordendetallemodal";
+import Paginacion from "../../components/clientes/Paginacion";
 import { crearContextoOrden } from "../../pages/ordenes/state/Ordenstate";
-import Paginacion, { getPageSizes } from "../../components/common/Paginacion";
 import "../../pages/ordenes/Ordenes.css";
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -23,6 +23,8 @@ const PRIORIDAD_CLASS = {
   2: "or-prioridad--2", 3: "or-prioridad--3",
 };
 
+const POR_PAGINA = 8;
+
 export default function Ordenesmodule() {
   const { user } = useAuth();
   const {
@@ -37,16 +39,19 @@ export default function Ordenesmodule() {
   const [filtroEstado, setFiltroEstado] = useState("");
   const debounceRef = useRef(null);
 
+  // ── Paginación ───────────────────────────────────────────────────────────
+  const [paginaActual, setPaginaActual] = useState(1);
+
   function handleSearch(val) {
     setQuery(val);
-    setPagina(1);
+    setPaginaActual(1); // reset al buscar
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load({ estado: filtroEstado }), 350);
   }
 
   function handleFiltroEstado(val) {
     setFiltroEstado(val);
-    setPagina(1);
+    setPaginaActual(1); // reset al filtrar
     load({ estado: val });
   }
 
@@ -58,16 +63,18 @@ export default function Ordenesmodule() {
     return hay.includes(query.toLowerCase());
   });
 
-  // ── Paginación ───────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes  = getPageSizes(filtradas.length);
-  const totalPaginas = pageSizes.length;
-  const offset     = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const paginadas  = filtradas.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+  // Recorte de la página actual sobre el resultado ya filtrado
+  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+  const paginaSegura = Math.min(paginaActual, totalPaginas);
+  const paginadas = filtradas.slice(
+    (paginaSegura - 1) * POR_PAGINA,
+    paginaSegura * POR_PAGINA
+  );
 
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
+  function handleCambiarPagina(p) {
+    if (p < 1 || p > totalPaginas) return;
+    setPaginaActual(p);
+  }
 
   // ── Toast ────────────────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -300,11 +307,10 @@ export default function Ordenesmodule() {
       </div>
 
       <Paginacion
-        paginaActual={pagina}
+        paginaActual={paginaSegura}
         totalPaginas={totalPaginas}
-        totalItems={filtradas.length}
-        itemLabel="orden"
-        onCambiarPagina={setPagina}
+        totalClientes={filtradas.length}
+        onCambiarPagina={handleCambiarPagina}
       />
 
       {/* Modales */}

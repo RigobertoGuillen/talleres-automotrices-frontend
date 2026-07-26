@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import vehiculoService from '../../services/vehiculoService';
 import { apiSearchClientes } from '../../services/clientesService';
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
+import Paginacion from '../../components/clientes/Paginacion';
 import '../../styles/dashboard-dark.css';
 
 const TIPOS = ['Pickup', 'turismo', 'camioneta'];
 const FORM_VACIO = { placa: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', tipo: 'turismo', cliente_id: '' };
+const PAGE_SIZE = 8;
 
 const badgeTipo = (tipo) => {
   const m = {
@@ -34,6 +35,7 @@ export default function Vehiculos() {
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [vehiculoEditar, setVehiculoEditar] = useState(null);
@@ -79,16 +81,11 @@ export default function Vehiculos() {
     );
   });
 
-  // ── Paginación ────────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes    = getPageSizes(vehiculosFiltrados.length);
-  const totalPaginas = pageSizes.length;
-  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const vehiculosPagina = vehiculosFiltrados.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
+  useEffect(() => { setPagina(1); }, [busqueda]);
 
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
+  const totalPaginas = Math.max(1, Math.ceil(vehiculosFiltrados.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const vehiculosPagina = vehiculosFiltrados.slice(offset, offset + PAGE_SIZE);
 
   const abrirCrear = () => {
     setVehiculoEditar(null);
@@ -261,13 +258,14 @@ export default function Vehiculos() {
         )}
       </div>
 
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={vehiculosFiltrados.length}
-        itemLabel="vehículo"
-        onCambiarPagina={setPagina}
-      />
+      {!cargando && !error && vehiculosFiltrados.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={vehiculosFiltrados.length}
+          onCambiarPagina={setPagina}
+        />
+      )}
 
       {modalAbierto && (
         <div className="dt-overlay">

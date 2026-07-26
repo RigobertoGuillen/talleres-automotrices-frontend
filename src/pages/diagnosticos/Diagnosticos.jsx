@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import diagnosticoService from '../../services/diagnosticoService';
-import Paginacion, { getPageSizes } from '../../components/common/Paginacion';
+import Paginacion from '../../components/clientes/Paginacion';
 import '../../styles/dashboard-dark.css';
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado'];
 const FORM_VACIO = { orden_id: '', descripcion_falla: '', observaciones: '', recomendaciones: '', estado: 'pendiente' };
+const PAGE_SIZE = 8;
 
 const badgeEstado = (estado) => {
   const m = {
@@ -30,6 +31,7 @@ export default function Diagnosticos() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
+  const [pagina, setPagina] = useState(1); // 1-indexado, igual que <Paginacion>
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [form, setForm] = useState(FORM_VACIO);
@@ -44,17 +46,6 @@ export default function Diagnosticos() {
   const [ordenHistorial, setOrdenHistorial] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
-
-  // ── Paginación ────────────────────────────────────────────────────────────
-  const [pagina, setPagina] = useState(1);
-  const pageSizes    = getPageSizes(diagnosticos.length);
-  const totalPaginas = pageSizes.length;
-  const offset       = pageSizes.slice(0, pagina - 1).reduce((a, b) => a + b, 0);
-  const diagnosticosPagina = diagnosticos.slice(offset, offset + (pageSizes[pagina - 1] ?? 10));
-
-  useEffect(() => {
-    if (pagina > totalPaginas) setPagina(Math.max(1, totalPaginas));
-  }, [totalPaginas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function mostrarToast(msg) {
     setToast(msg);
@@ -82,6 +73,12 @@ export default function Diagnosticos() {
     const timeout = setTimeout(cargarDiagnosticos, 300);
     return () => clearTimeout(timeout);
   }, [cargarDiagnosticos]);
+
+  useEffect(() => { setPagina(1); }, [filtroEstado, busqueda]);
+
+  const totalPaginas = Math.max(1, Math.ceil(diagnosticos.length / PAGE_SIZE));
+  const offset = (pagina - 1) * PAGE_SIZE;
+  const diagnosticosPagina = diagnosticos.slice(offset, offset + PAGE_SIZE);
 
   const abrirCrear = () => {
     setForm(FORM_VACIO);
@@ -293,13 +290,14 @@ export default function Diagnosticos() {
         )}
       </div>
 
-      <Paginacion
-        paginaActual={pagina}
-        totalPaginas={totalPaginas}
-        totalItems={diagnosticos.length}
-        itemLabel="diagnóstico"
-        onCambiarPagina={setPagina}
-      />
+      {!cargando && !error && diagnosticos.length > 0 && (
+        <Paginacion
+          paginaActual={pagina}
+          totalPaginas={totalPaginas}
+          totalClientes={diagnosticos.length}
+          onCambiarPagina={setPagina}
+        />
+      )}
 
       {/* Modal HU14: registrar diagnostico */}
       {modalAbierto && (

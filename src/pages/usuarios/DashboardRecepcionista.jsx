@@ -7,11 +7,15 @@ import ClientesModule from "../../pages/clientes/ClientesModule";
 import Ordenesmodule from "../../pages/ordenes/Ordenesmodule";
 import Vehiculos from "../../pages/vehiculos/Vehiculos";
 import Diagnosticos from "../../pages/diagnosticos/Diagnosticos";
+
+import Inventario from "../../pages/inventario/Inventario";
+
 import CatalogoServicios from "../../pages/servicios/CatalogoServicios";
 import ServiciosOrdenPage from "../../pages/servicios/ServiciosOrdenPage";
 import GenerarFactura from "../../pages/facturacion/GenerarFactura";
 import Facturas from "../../pages/facturacion/Facturas";
 import ActualizacionesCai from "../../pages/facturacion/ActualizacionesCai";
+
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -67,6 +71,10 @@ export default function DashboardRecepcionista() {
         return <Vehiculos />;
       case "diagnosticos":
         return <Diagnosticos />;
+
+      case "inventario":
+        return <Inventario rol="recepcionista" />;
+
       case "servicios-orden":
         return <ServiciosOrdenPage />;
       case "servicios":
@@ -77,6 +85,7 @@ export default function DashboardRecepcionista() {
         return <Facturas />;
       case "facturacion-cai":
         return <ActualizacionesCai />;
+
       default:
         return (
           <>
