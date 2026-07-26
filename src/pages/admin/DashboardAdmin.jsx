@@ -18,6 +18,7 @@ import GenerarFactura from "../../pages/facturacion/GenerarFactura";
 import Facturas from "../../pages/facturacion/Facturas";
 import ActualizacionesCai from "../../pages/facturacion/ActualizacionesCai";
 
+import Reportes from "../../pages/reportes/Reportes";
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -55,6 +56,9 @@ const welcome = {
   subtitle: "El sistema se encuentra sincronizado con la base de datos en tiempo real.",
 };
 
+// HU-45: actualización automática de los indicadores del dashboard.
+const INTERVALO_ACTUALIZACION_MS = 30000;
+
 export default function DashboardAdmin() {
   const [module, setModule] = useState("dashboard");
   const [stats, setStats] = useState({
@@ -66,20 +70,34 @@ export default function DashboardAdmin() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Llamada al endpoint para traer las métricas reales
+  // Llamada al endpoint para traer las métricas reales, con actualización
+  // automática mientras el administrador está viendo el dashboard (HU-45).
   useEffect(() => {
-    if (module === "dashboard") {
-      setLoading(true);
+    if (module !== "dashboard") return;
+
+    let activo = true;
+
+    function cargarStats(mostrarLoading) {
+      if (mostrarLoading) setLoading(true);
       api.get("/dashboard/stats")
         .then((res) => {
-          setStats(res.data);
-          setLoading(false);
+          if (activo) setStats(res.data);
         })
         .catch((err) => {
           console.error("Error cargando estadísticas del dashboard:", err);
-          setLoading(false);
+        })
+        .finally(() => {
+          if (activo && mostrarLoading) setLoading(false);
         });
     }
+
+    cargarStats(true);
+    const intervalo = setInterval(() => cargarStats(false), INTERVALO_ACTUALIZACION_MS);
+
+    return () => {
+      activo = false;
+      clearInterval(intervalo);
+    };
   }, [module]);
 
   function handleModule(key) {
@@ -114,6 +132,9 @@ export default function DashboardAdmin() {
         return <Facturas />;
       case "facturacion-cai":
         return <ActualizacionesCai />;
+
+      case "reportes":
+        return <Reportes />;
 
       default:
         return (
