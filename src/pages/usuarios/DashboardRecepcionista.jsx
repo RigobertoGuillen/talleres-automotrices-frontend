@@ -1,4 +1,5 @@
-import { useState } from "react";
+import api from "../../services/api";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Header from "../../components/dashboard/Header";
 import StatCard from "../../components/dashboard/StatCard";
@@ -15,7 +16,6 @@ import ServiciosOrdenPage from "../../pages/servicios/ServiciosOrdenPage";
 import GenerarFactura from "../../pages/facturacion/GenerarFactura";
 import Facturas from "../../pages/facturacion/Facturas";
 import ActualizacionesCai from "../../pages/facturacion/ActualizacionesCai";
-
 
 const modules = [
   { key: "dashboard",    label: "Dashboard" },
@@ -41,13 +41,6 @@ const modules = [
   },
 ];
 
-const cards = [
-  { title: "Órdenes activas",   value: 12,         color: "#6C63FF" },
-  { title: "Clientes",          value: "128",       color: "#63B3ED" },
-  { title: "Ingresos cobrados", value: "$2,000.00", color: "#F6AD55" },
-  { title: "Stock bajo",        value: "2",         color: "#FC8181" },
-];
-
 const header = {
   title: "Taller Mecánica Automotriz SuperAuto",
   subtitle: "Usted está identificado como Recepcionista",
@@ -58,8 +51,52 @@ const welcome = {
   subtitle: "Desde aquí puedes gestionar todo el sistema del taller.",
 };
 
+// HU-45: mismos indicadores que el dashboard de administrador, pero con las
+// 4 tarjetas relevantes para recepción, y con actualización automática.
+const INTERVALO_ACTUALIZACION_MS = 30000;
+
+function fmtMoneda(valor) {
+  const n = Number(valor) || 0;
+  return `L. ${n.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export default function DashboardRecepcionista() {
   const [module, setModule] = useState("dashboard");
+  const [stats, setStats] = useState({
+    ordenesActivas: 0,
+    totalClientes: 0,
+    ingresosMes: 0,
+    alertasInventario: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (module !== "dashboard") return;
+
+    let activo = true;
+
+    function cargarStats(mostrarLoading) {
+      if (mostrarLoading) setLoading(true);
+      api.get("/dashboard/stats")
+        .then((res) => {
+          if (activo) setStats(res.data);
+        })
+        .catch((err) => {
+          console.error("Error cargando estadísticas del dashboard:", err);
+        })
+        .finally(() => {
+          if (activo && mostrarLoading) setLoading(false);
+        });
+    }
+
+    cargarStats(true);
+    const intervalo = setInterval(() => cargarStats(false), INTERVALO_ACTUALIZACION_MS);
+
+    return () => {
+      activo = false;
+      clearInterval(intervalo);
+    };
+  }, [module]);
 
   function renderContent() {
     switch (module) {
@@ -90,14 +127,18 @@ export default function DashboardRecepcionista() {
         return (
           <>
             <div className="cards">
-              {cards.map((card) => (
-                <StatCard
-                  key={card.title}
-                  title={card.title}
-                  value={card.value}
-                  color={card.color}
-                />
-              ))}
+              {loading ? (
+                <p style={{ color: "#7B7A9E", gridColumn: "1/-1", fontSize: "14px" }}>
+                  Cargando métricas operativas...
+                </p>
+              ) : (
+                <>
+                  <StatCard title="Órdenes activas" value={stats.ordenesActivas} color="#6C63FF" />
+                  <StatCard title="Clientes" value={stats.totalClientes} color="#63B3ED" />
+                  <StatCard title="Ingresos del mes" value={fmtMoneda(stats.ingresosMes)} color="#F6AD55" />
+                  <StatCard title="Stock bajo" value={stats.alertasInventario} color="#FC8181" />
+                </>
+              )}
             </div>
             <div className="welcome">
               <h2>{welcome.title}</h2>
