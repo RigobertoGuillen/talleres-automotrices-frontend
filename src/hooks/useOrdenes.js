@@ -90,28 +90,28 @@ export function useOrdenes(user) {
   // ── Asignar mecánico (HU-20) ─────────────────────────────────────────────
   const asignar = useCallback(async (id, mecanicoId) => {
     const actualizada = await asignarMecanico(id, mecanicoId);
-    setOrdenes((prev) => prev.map((o) => (o.id === id ? actualizada : o)));
+    setOrdenes((prev) => prev.map((o) => (o.numero_orden === id ? actualizada : o)));
     return actualizada;
   }, []);
 
   // ── Actualizar estado (HU-22) ────────────────────────────────────────────
   const updateEstado = useCallback(async (id, payload) => {
     const actualizada = await actualizarEstado(id, payload);
-    setOrdenes((prev) => prev.map((o) => (o.id === id ? actualizada : o)));
+    setOrdenes((prev) => prev.map((o) => (o.numero_orden === id ? actualizada : o)));
     return actualizada;
   }, []);
 
   // ── Cerrar orden (HU-23) ─────────────────────────────────────────────────
   const cerrar = useCallback(async (id) => {
     const actualizada = await cerrarOrden(id);
-    setOrdenes((prev) => prev.map((o) => (o.id === id ? actualizada : o)));
+    setOrdenes((prev) => prev.map((o) => (o.numero_orden === id ? actualizada : o)));
     return actualizada;
   }, []);
 
   // ── Reasignar mecánico (HU-26) ───────────────────────────────────────────
   const reasignar = useCallback(async (id, mecanicoId) => {
     const actualizada = await reasignarOrden(id, mecanicoId);
-    setOrdenes((prev) => prev.map((o) => (o.id === id ? actualizada : o)));
+    setOrdenes((prev) => prev.map((o) => (o.numero_orden === id ? actualizada : o)));
     return actualizada;
   }, []);
 
