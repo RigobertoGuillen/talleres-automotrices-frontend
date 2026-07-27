@@ -29,7 +29,7 @@ const inventarioService = {
   // Solicitudes (HU-30). Sin flujo de aprobación: son bitácora informativa;
   // el ajuste real de stock se hace registrando la salida en el Kardex.
   crearSolicitud: (data) => api.post('/inventario/solicitudes', data),
-  solicitudesRecientes: () => api.get('/inventario/solicitudes/recientes'),
+  solicitudesRecientes: () => api.get('/inventario/solicitudes'),
   solicitudesPorOrden: (ordenId) => api.get(`/inventario/solicitudes/orden/${ordenId}`),
   listarSolicitudes: () => api.get('/inventario/solicitudes'),
 };

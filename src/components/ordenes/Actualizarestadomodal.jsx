@@ -31,7 +31,7 @@ export default function ActualizarEstadoModal({ open, onClose, onSave, onCerrar,
   }
 
   function handleCerrar() {
-    onCerrar(orden.id);
+    onCerrar(orden.numero_orden);
   }
 
   return (

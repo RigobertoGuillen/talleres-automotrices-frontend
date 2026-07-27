@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import diagnosticoService from '../../services/diagnosticoService';
 import Paginacion from '../../components/clientes/Paginacion';
 import '../../styles/dashboard-dark.css';
+import { useAuth } from '../../context/AuthContext';
+import { getOrdenes, getOrdenesByMecanico } from '../../services/ordenesService';
 
 const ESTADOS = ['pendiente', 'en proceso', 'completado'];
 const FORM_VACIO = { orden_id: '', descripcion_falla: '', observaciones: '', recomendaciones: '', estado: 'pendiente' };
@@ -25,6 +27,12 @@ function fmtFecha(iso) {
 }
 
 export default function Diagnosticos() {
+  const { user } = useAuth();
+  const esMecanico = user?.rol === 'mecanico';
+
+  const [ordenesDisponibles, setOrdenesDisponibles] = useState([]);
+  const [cargandoOrdenes, setCargandoOrdenes] = useState(false);
+
   const [diagnosticos, setDiagnosticos] = useState([]);
   const [filtroEstado, setFiltroEstado] = useState('');
   const [busqueda, setBusqueda] = useState('');
@@ -80,10 +88,21 @@ export default function Diagnosticos() {
   const offset = (pagina - 1) * PAGE_SIZE;
   const diagnosticosPagina = diagnosticos.slice(offset, offset + PAGE_SIZE);
 
-  const abrirCrear = () => {
+ const abrirCrear = async () => {
     setForm(FORM_VACIO);
     setErrorModal('');
     setModalAbierto(true);
+    setCargandoOrdenes(true);
+    try {
+      const data = esMecanico
+        ? await getOrdenesByMecanico(user.id)
+        : await getOrdenes();
+      setOrdenesDisponibles((data || []).filter(o => o.estado !== 'entregado'));
+    } catch {
+      setOrdenesDisponibles([]);
+    } finally {
+      setCargandoOrdenes(false);
+    }
   };
 
   const cerrarModal = () => setModalAbierto(false);
@@ -94,8 +113,7 @@ export default function Diagnosticos() {
     setGuardando(true);
     setErrorModal('');
     try {
-      const payload = { ...form, orden_id: Number(form.orden_id) };
-      await diagnosticoService.crear(payload);
+      await diagnosticoService.crear(form); // antes: { ...form, orden_id: Number(form.orden_id) }
       cerrarModal();
       mostrarToast('Diagnóstico registrado correctamente.');
       cargarDiagnosticos();
@@ -312,13 +330,22 @@ export default function Diagnosticos() {
 
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: 14 }}>
-                <label className="dt-label">ID Orden de Trabajo *</label>
-                <input
-                  className="dt-input" type="number" required min={1}
-                  placeholder="ID numérico de la orden"
+                <label className="dt-label">Orden de Trabajo *</label>
+                <select
+                  className="dt-select-field"
+                  required
                   value={form.orden_id}
                   onChange={e => setForm(f => ({ ...f, orden_id: e.target.value }))}
-                />
+                >
+                  <option value="">
+                    {cargandoOrdenes ? 'Cargando órdenes...' : 'Selecciona una orden...'}
+                  </option>
+                  {ordenesDisponibles.map(o => (
+                    <option key={o.numero_orden} value={o.numero_orden}>
+                      #{o.numero_orden} — {o.placa ?? '—'} ({o.cliente_nombre ?? 'sin cliente'})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ marginBottom: 14 }}>

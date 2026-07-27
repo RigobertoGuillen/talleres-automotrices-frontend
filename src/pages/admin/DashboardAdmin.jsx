@@ -27,6 +27,7 @@ const modules = [
     key: "facturación",
     label: "Facturación",
     children: [
+      { key: "facturacion-generar", label: "Generar Factura" },
       { key: "facturacion-listado", label: "Facturas" },
       { key: "facturacion-cai",     label: "Actualizaciones CAI" },
     ],
@@ -152,6 +153,8 @@ export default function DashboardAdmin() {
       case "diagnosticos":
         return <Diagnosticos />;
         case "facturación":
+        return <GenerarFactura />;
+      case "facturacion-generar":
         return <GenerarFactura />;
       case "facturacion-listado":
         return <Facturas />;

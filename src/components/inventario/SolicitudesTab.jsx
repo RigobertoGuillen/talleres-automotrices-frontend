@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import inventarioService from '../../services/inventarioService';
 import { s, btnAccion } from './styles';
 import Paginacion from '../../components/clientes/Paginacion';
+import { useAuth } from '../../context/AuthContext';
+import { getOrdenesByMecanico } from '../../services/ordenesService';
 
 const POR_PAGINA = 8;
 
@@ -14,7 +16,11 @@ const FORM_VACIO = { orden_id: '', repuesto_id: '', cantidad_solicitada: '' };
 // Kardex —el botón "Registrar salida" de abajo lo lleva directo ahí con
 // el repuesto, la cantidad y la orden ya prellenados.
 export default function SolicitudesTab({ esAdministrador, esMecanico, onRegistrarSalida }) {
+  const { user } = useAuth();
   const [repuestos, setRepuestos] = useState([]);
+  const [ordenesAsignadas, setOrdenesAsignadas] = useState([]);
+
+  
 
   const [form, setForm] = useState(FORM_VACIO);
   const [guardando, setGuardando] = useState(false);
@@ -28,6 +34,13 @@ export default function SolicitudesTab({ esAdministrador, esMecanico, onRegistra
   const [cargandoRecientes, setCargandoRecientes] = useState(false);
   const [errorRecientes, setErrorRecientes] = useState('');
   const [paginaActual, setPaginaActual] = useState(1);
+
+  useEffect(() => {
+    if (!esMecanico || !user?.id) return;
+    getOrdenesByMecanico(user.id)
+      .then(data => setOrdenesAsignadas((data || []).filter(o => o.estado !== 'entregado')))
+      .catch(() => setOrdenesAsignadas([]));
+  }, [esMecanico, user?.id]);
 
   useEffect(() => {
     inventarioService.listarRepuestos()
@@ -98,8 +111,15 @@ export default function SolicitudesTab({ esAdministrador, esMecanico, onRegistra
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto', gap: 12, alignItems: 'end' }}>
               <div>
                 <label style={s.label}>Orden de trabajo *</label>
-                <input style={s.input} required placeholder="Ej: ORD-1"
-                  value={form.orden_id} onChange={e => setForm(f => ({ ...f, orden_id: e.target.value }))} />
+                <select style={s.input} required
+                  value={form.orden_id} onChange={e => setForm(f => ({ ...f, orden_id: e.target.value }))}>
+                  <option value="">Seleccionar orden</option>
+                  {ordenesAsignadas.map(o => (
+                    <option key={o.numero_orden} value={o.numero_orden}>
+                      {o.numero_orden} — {o.placa ?? '—'} ({o.cliente_nombre ?? 'sin cliente'})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label style={s.label}>Repuesto *</label>
